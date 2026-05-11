@@ -88,16 +88,20 @@ is_device_connected() {
 
 connect_adb() {
     wait_for_wifi
-    log_info "Kết nối ADB tới $ADB_DEVICE..."
-    "$ADB" disconnect >/dev/null 2>&1
-    "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
-    
-    if is_device_connected; then
-        log_info "Kết nối thành công!"
-    else
-        log_error "Không thể kết nối ADB. Vui lòng kiểm tra lại!"
-        exit 1
-    fi
+    local prompt_adb=0
+    while true; do
+        "$ADB" disconnect >/dev/null 2>&1
+        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
+        if is_device_connected; then
+            log_info "Kết nối ADB thành công!"
+            return
+        fi
+        if [ "$prompt_adb" -eq 0 ]; then
+            log_warn "Đã thấy thiết bị nhưng ADB chưa sẵn sàng, đang thử lại..."
+            prompt_adb=1
+        fi
+        sleep 2
+    done
 }
 
 hide_bloatware() {
