@@ -16,12 +16,14 @@ UNI_SOUND_APK="uni-sound.apk"
 log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
-    echo "=====> Cài qua Termux <====="
-    echo "Vui lòng chờ cài đặt các gói."
     if command -v pkg >/dev/null 2>&1; then
+        echo "=====> Cài qua Termux <====="
+        echo "Vui lòng chờ cài đặt các gói."
         pkg update -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
     elif command -v apk >/dev/null 2>&1; then
+        echo "=====> Cài qua iSH <====="
+        echo "Vui lòng chờ cài đặt các gói."
         apk add wget curl android-tools >/dev/null 2>&1
     fi
     echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
