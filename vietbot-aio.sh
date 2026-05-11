@@ -71,9 +71,12 @@ progress_download() {
 }
 
 wait_for_wifi() {
-    log_info "Kiểm tra kết nối tới IP $ADB_DEVICE_IP..."
+    local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
-        log_warn "Hãy kết nối tới Wifi của loa: Phicomm R1"
+        if [ "$prompt_shown" -eq 0 ]; then
+            log_warn "Hãy kết nối tới Wifi của loa: Phicomm R1"
+            prompt_shown=1
+        fi
         sleep 3
     done
     log_info "Đã thấy thiết bị trực tuyến."
