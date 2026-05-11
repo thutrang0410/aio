@@ -155,6 +155,7 @@ main() {
                 
                 log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
+                echo "[PHICOMM-R1] Vào wifi Phicomm R1, truy cập 192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             3|4)
