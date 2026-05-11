@@ -150,9 +150,9 @@ main() {
             1|2)
                 [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot APK"
-                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA APK"
-                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound APK"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
+                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
+                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
                 connect_adb
                 hide_bloatware
