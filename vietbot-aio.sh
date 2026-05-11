@@ -16,20 +16,24 @@ UNI_SOUND_APK="uni-sound.apk"
 log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
+    echo "=====> Cài qua Termux <====="
+    echo "Vui lòng chờ cài đặt các gói."
     if command -v pkg >/dev/null 2>&1; then
-        pkg update -y && pkg up -y wget
+        pkg update -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
     elif command -v apk >/dev/null 2>&1; then
         apk add wget curl android-tools >/dev/null 2>&1
     fi
+    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     rm -f "$HOME"/*.apk >/dev/null 2>&1
+    echo "Đã xoá bộ nhớ."
 }
 
 progress_download() {
     url="$1"
     output="$2"
     name="$3"
-    echo "[PHICOMM-R1] Đang tải $name..."
+    echo "Đang tải $name..."
     total_size=$(curl -sIL "$url" | grep -i Content-Length | tail -1 | tr -d '\r' | awk '{print $2}')
     curl -L -sS "$url" -o "$output" >/dev/null 2>&1 &
     pid=$!
@@ -59,6 +63,7 @@ wait_for_wifi() {
         fi
         sleep 3
     done
+    log_info "Đã ping thành công $ADB_DEVICE_IP."
 }
 
 is_device_connected() {
@@ -66,6 +71,7 @@ is_device_connected() {
 }
 
 connect_adb() {
+    log_info "Khởi động lại kết nối ADB..."
     wait_for_wifi
     local prompt_adb=0
     while true; do
@@ -73,7 +79,6 @@ connect_adb() {
         "$ADB" kill-server >/dev/null 2>&1
         "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
         if is_device_connected; then
-            log_info "Kết nối ADB thành công!"
             return
         fi
         if [ "$prompt_adb" -eq 0 ]; then
@@ -86,10 +91,10 @@ connect_adb() {
 
 hide_bloatware() {
     log_info "Vô hiệu hóa bloatware..."
-    local apps="airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport device"
+    local apps="device airskill exceptionreporter systemtool otaservice productiontest bugreport"
     for app in $apps; do
         log_info "Vô hiệu $app"
-        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
+        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app"
     done
 }
 
@@ -97,30 +102,23 @@ install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
     local remote_path="/data/local/tmp/$apk_file"
-    log_info "Đẩy $apk_file lên thiết bị..."
+    log_info "Đẩy APKs lên thiết bị..."
     "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
     log_info "Cài đặt $apk_file..."
-    if "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" | grep -q "Success"; then
-        log_info "Cài đặt $apk_file thành công."
-        return 0
-    else
-        log_info "Cài đặt $apk_file THẤT BẠI."
-        return 1
-    fi
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
 }
 
 show_menu() {
     clear
-    echo "===================================================="
-    echo "||            VIETBOT ALL-IN-ONE                  ||"
-    echo "||               By Thu Trang                     ||"
-    echo "===================================================="
+    echo "===================================="
+    echo "||  CÀI ĐẶT VIETBOT BY THU TRANG  ||"
+    echo "===================================="
     echo " 1. Cài Full 3 Apps (Free)"
     echo " 2. Cài Full 3 Apps (Premium)"
     echo " 3. Update Free"
     echo " 4. Update Premium"
     echo " 0. Thoát"
-    echo "===================================================="
+    echo "===================================="
     printf "Chọn số (0-4): "
 }
 
@@ -131,19 +129,21 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                if [ "$choice" = "1" ]; then APK=$FREE_APK; NAME="Free"; else APK=$PREMIUM_APK; NAME="Premium"; fi
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
-                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "$DLNA_APK"
-                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "$UNI_SOUND_APK"
+                if [ "$choice" = "1" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                echo "[1/2] Chuẩn bị cài đặt."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
+                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
+                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
-                log_info "Kiểm tra ADB..."
+                echo "[2/2] Cài đặt Vietbot."
+                log_info "Kiểm tra Adb..."
                 connect_adb
                 hide_bloatware
                 
                 log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
-                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
-                install_apk "$HOME/$APK" || exit 1
+                install_apk "$HOME/$APK"
                 install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
@@ -151,29 +151,37 @@ main() {
                 
                 log_info "Kích hoạt lại player"
                 log_info "Kích hoạt player"
-                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
                 log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "[PHICOMM-R1] Vào wifi Phicomm R1, truy cập 192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             3|4)
-                if [ "$choice" = "3" ]; then APK=$FREE_APK; NAME="Free"; else APK=$PREMIUM_APK; NAME="Premium"; fi
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
+                if [ "$choice" = "3" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                echo "[1/2] Chuẩn bị cài đặt."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 
-                log_info "Kiểm tra ADB..."
+                echo "[2/2] Cài đặt Vietbot."
+                log_info "Kiểm tra Adb..."
                 connect_adb
-                install_apk "$HOME/$APK" || exit 1
+                
+                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
+                
+                install_apk "$HOME/$APK"
                 
                 log_info "Khởi động ứng dụng $APK..."
-                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
+                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 
-                log_info "Cập nhật hoàn tất."
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             0) exit 0 ;;
-            *) echo "[PHICOMM-R1] Lựa chọn không hợp lệ!"; sleep 2 ;;
+            *) echo "Lựa chọn không hợp lệ!"; sleep 2 ;;
         esac
     done
 }
