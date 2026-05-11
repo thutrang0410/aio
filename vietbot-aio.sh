@@ -13,9 +13,7 @@ PREMIUM_APK="premium.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
-log_info() { echo "[INFO] $*"; }
-log_warn() { echo "[WARN] $*"; }
-log_error() { echo "[ERROR] $*"; }
+log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
     if command -v pkg >/dev/null 2>&1; then
@@ -31,7 +29,7 @@ progress_download() {
     url="$1"
     output="$2"
     name="$3"
-    log_info "Đang tải $name..."
+    echo "[PHICOMM-R1] Đang tải $name..."
     total_size=$(curl -sIL "$url" | grep -i Content-Length | tail -1 | tr -d '\r' | awk '{print $2}')
     curl -L -sS "$url" -o "$output" >/dev/null 2>&1 &
     pid=$!
@@ -56,12 +54,11 @@ wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
         if [ "$prompt_shown" -eq 0 ]; then
-            log_warn "Hãy kết nối tới Wifi của loa: Phicomm R1"
+            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
             prompt_shown=1
         fi
         sleep 3
     done
-    log_info "Đã thấy thiết bị trực tuyến."
 }
 
 is_device_connected() {
@@ -73,13 +70,14 @@ connect_adb() {
     local prompt_adb=0
     while true; do
         "$ADB" disconnect >/dev/null 2>&1
+        "$ADB" kill-server >/dev/null 2>&1
         "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
         if is_device_connected; then
             log_info "Kết nối ADB thành công!"
             return
         fi
         if [ "$prompt_adb" -eq 0 ]; then
-            log_warn "Đã thấy thiết bị nhưng ADB chưa sẵn sàng, đang thử lại..."
+            echo "[PHICOMM-R1] Đã thấy thiết bị nhưng ADB chưa sẵn sàng, đang thử lại..."
             prompt_adb=1
         fi
         sleep 2
@@ -87,21 +85,28 @@ connect_adb() {
 }
 
 hide_bloatware() {
-    log_info "Đang vô hiệu hóa ứng dụng rác (bloatware)..."
+    log_info "Vô hiệu hóa bloatware..."
     local apps="airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport device"
     for app in $apps; do
+        log_info "Vô hiệu $app"
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
     done
 }
 
 install_apk() {
     local local_path="$1"
-    local name="$2"
-    local remote_path="/data/local/tmp/$(basename "$local_path")"
-    log_info "Đang đẩy $name lên loa..."
+    local apk_file=$(basename "$local_path")
+    local remote_path="/data/local/tmp/$apk_file"
+    log_info "Đẩy $apk_file lên thiết bị..."
     "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
-    log_info "Đang cài đặt $name (Vui lòng đợi)..."
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
+    log_info "Cài đặt $apk_file..."
+    if "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" | grep -q "Success"; then
+        log_info "Cài đặt $apk_file thành công."
+        return 0
+    else
+        log_info "Cài đặt $apk_file THẤT BẠI."
+        return 1
+    fi
 }
 
 show_menu() {
@@ -126,35 +131,48 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                if [ "$choice" = "1" ]; then APK=$FREE_APK; NAME="Vietbot Free"; else APK=$PREMIUM_APK; NAME="Vietbot Premium"; fi
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$NAME"
-                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
-                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
+                if [ "$choice" = "1" ]; then APK=$FREE_APK; NAME="Free"; else APK=$PREMIUM_APK; NAME="Premium"; fi
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
+                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "$DLNA_APK"
+                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "$UNI_SOUND_APK"
+                
+                log_info "Kiểm tra ADB..."
                 connect_adb
                 hide_bloatware
-                log_info "Đang dọn dẹp bản cài cũ..."
+                
+                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
-                install_apk "$HOME/$APK" "$NAME"
-                install_apk "$HOME/$DLNA_APK" "DLNA"
-                install_apk "$HOME/$UNI_SOUND_APK" "Unisound"
+                
+                install_apk "$HOME/$APK" || exit 1
+                install_apk "$HOME/$DLNA_APK"
+                install_apk "$HOME/$UNI_SOUND_APK"
+                
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
+                
+                log_info "Kích hoạt lại player"
+                log_info "Kích hoạt player"
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
-                log_info "Hoàn tất! Đang khởi động lại loa..."
+                
+                log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
                 exit 0
                 ;;
             3|4)
-                if [ "$choice" = "3" ]; then APK=$FREE_APK; NAME="Vietbot Free"; else APK=$PREMIUM_APK; NAME="Vietbot Premium"; fi
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update $NAME"
+                if [ "$choice" = "3" ]; then APK=$FREE_APK; NAME="Free"; else APK=$PREMIUM_APK; NAME="Premium"; fi
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
+                
+                log_info "Kiểm tra ADB..."
                 connect_adb
-                install_apk "$HOME/$APK" "$NAME"
-                log_info "Đang khởi chạy ứng dụng..."
+                install_apk "$HOME/$APK" || exit 1
+                
+                log_info "Khởi động ứng dụng $APK..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
-                log_info "Cập nhật thành công!"
+                
+                log_info "Cập nhật hoàn tất."
                 exit 0
                 ;;
             0) exit 0 ;;
-            *) log_error "Lựa chọn không hợp lệ!"; sleep 2 ;;
+            *) echo "[PHICOMM-R1] Lựa chọn không hợp lệ!"; sleep 2 ;;
         esac
     done
 }
