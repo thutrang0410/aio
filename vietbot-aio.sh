@@ -16,19 +16,29 @@ UNI_SOUND_APK="uni-sound.apk"
 log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
-    if command -v pkg >/dev/null 2>&1; then
+    if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
+        echo ""
         echo "Vui lòng chờ cài đặt các gói."
-        pkg update -y >/dev/null 2>&1
+        echo ""
+        pkg upgrade -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
     elif command -v apk >/dev/null 2>&1; then
         echo "=====> Cài qua iSH <====="
+        echo ""
         echo "Vui lòng chờ cài đặt các gói."
+        echo ""
         apk add wget curl android-tools >/dev/null 2>&1
+    else
+        echo "Lỗi Script"
+        exit 1
     fi
     echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
+    echo ""
     rm -f "$HOME"/*.apk >/dev/null 2>&1
+    rm -f "$HOME"/*.sh >/dev/null 2>&1
     echo "Đã xoá bộ nhớ."
+    echo ""
 }
 
 progress_download() {
@@ -45,15 +55,15 @@ progress_download() {
             if [ -n "$total_size" ] && [ "$total_size" -gt 0 ]; then
                 percent=$((current_size * 100 / total_size))
                 [ "$percent" -gt 100 ] && percent=100
-                bars=$((percent / 5))
+                bars=$((percent / 10))
                 done_bar=$(printf "%${bars}s" | tr ' ' '#')
-                printf "\r[%-20s] %3d%%" "$done_bar" "$percent"
+                printf "\r[%-10s] %3d%%" "$done_bar" "$percent"
             fi
         fi
         sleep 0.2
     done
     wait $pid
-    printf "\r[####################] 100%%\n"
+    printf "\r[##########] 100%%\n"
 }
 
 wait_for_wifi() {
@@ -132,11 +142,13 @@ main() {
         case $choice in
             1|2)
                 if [ "$choice" = "1" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                echo ""
                 echo "[1/2] Chuẩn bị cài đặt."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
+                echo ""
                 echo "[2/2] Cài đặt Vietbot."
                 log_info "Kiểm tra Adb..."
                 connect_adb
@@ -155,17 +167,21 @@ main() {
                 log_info "Kích hoạt player"
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
+                echo ""
                 log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
+                echo ""
                 echo "Cài đặt hoàn tất."
                 echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             3|4)
                 if [ "$choice" = "3" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                echo ""
                 echo "[1/2] Chuẩn bị cài đặt."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 
+                echo ""
                 echo "[2/2] Cài đặt Vietbot."
                 log_info "Kiểm tra Adb..."
                 connect_adb
@@ -178,6 +194,7 @@ main() {
                 log_info "Khởi động ứng dụng $APK..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 
+                echo ""
                 echo "Cài đặt hoàn tất."
                 echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
