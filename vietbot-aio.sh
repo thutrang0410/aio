@@ -99,8 +99,8 @@ install_apk() {
     local name="$2"
     local remote_path="/data/local/tmp/$(basename "$local_path")"
     log_info "Đang đẩy $name lên loa..."
-    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path" >/dev/null 2>&1
-    log_info "Đang cài đặt $name..."
+    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
+    log_info "Đang cài đặt $name (Vui lòng đợi)..."
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
 }
 
