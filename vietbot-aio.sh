@@ -31,17 +31,11 @@ log_error() {
 }
 
 setup_env() {
-    log_info "Kiểm tra và thiết lập môi trường..."
-    
     if command -v pkg >/dev/null 2>&1; then
-        log_info "Phát hiện Termux. Đang cập nhật gói..."
         pkg update -y && pkg up -y wget
         pkg install -y wget curl android-tools >/dev/null 2>&1
     elif command -v apk >/dev/null 2>&1; then
-        log_info "Phát hiện iSH. Đang cài đặt gói..."
         apk add wget curl android-tools >/dev/null 2>&1
-    else
-        log_warn "Không xác định được trình quản lý gói. Vui lòng đảm bảo wget, curl và adb đã được cài đặt."
     fi
 
     rm -f "$HOME"/*.apk >/dev/null 2>&1
@@ -124,7 +118,6 @@ install_apk() {
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
 }
 
-# --- Menu Logic ---
 show_menu() {
     clear
     echo "===================================================="
@@ -145,10 +138,9 @@ main() {
     
     while true; do
         show_menu
-        read choice
+        read choice < /dev/tty
         case $choice in
             1|2)
-
                 [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot APK"
@@ -175,7 +167,6 @@ main() {
                 exit 0
                 ;;
             3|4)
-
                 [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot APK Update"
