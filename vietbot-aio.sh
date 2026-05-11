@@ -13,17 +13,9 @@ PREMIUM_APK="premium.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
-log_info() {
-    echo "[INFO] $*"
-}
-
-log_warn() {
-    echo "[WARN] $*"
-}
-
-log_error() {
-    echo "[ERROR] $*"
-}
+log_info() { echo "[INFO] $*"; }
+log_warn() { echo "[WARN] $*"; }
+log_error() { echo "[ERROR] $*"; }
 
 setup_env() {
     if command -v pkg >/dev/null 2>&1; then
@@ -95,6 +87,7 @@ connect_adb() {
 }
 
 hide_bloatware() {
+    log_info "Đang vô hiệu hóa ứng dụng rác (bloatware)..."
     local apps="airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport device"
     for app in $apps; do
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
@@ -103,9 +96,11 @@ hide_bloatware() {
 
 install_apk() {
     local local_path="$1"
-    local remote_name=$(basename "$local_path")
-    local remote_path="/data/local/tmp/$remote_name"
+    local name="$2"
+    local remote_path="/data/local/tmp/$(basename "$local_path")"
+    log_info "Đang đẩy $name lên loa..."
     "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path" >/dev/null 2>&1
+    log_info "Đang cài đặt $name..."
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
 }
 
@@ -131,40 +126,35 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot APK"
-                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA APK"
-                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound APK"
+                if [ "$choice" = "1" ]; then APK=$FREE_APK; NAME="Vietbot Free"; else APK=$PREMIUM_APK; NAME="Vietbot Premium"; fi
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$NAME"
+                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
+                progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 connect_adb
                 hide_bloatware
+                log_info "Đang dọn dẹp bản cài cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
-                install_apk "$HOME/$APK"
-                install_apk "$HOME/$DLNA_APK"
-                install_apk "$HOME/$UNI_SOUND_APK"
+                install_apk "$HOME/$APK" "$NAME"
+                install_apk "$HOME/$DLNA_APK" "DLNA"
+                install_apk "$HOME/$UNI_SOUND_APK" "Unisound"
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
-                log_info "Hoàn tất. Đang reboot..."
+                log_info "Hoàn tất! Đang khởi động lại loa..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Xong! Chờ loa khởi động lại."
                 exit 0
                 ;;
             3|4)
-                [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot APK Update"
+                if [ "$choice" = "3" ]; then APK=$FREE_APK; NAME="Vietbot Free"; else APK=$PREMIUM_APK; NAME="Vietbot Premium"; fi
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update $NAME"
                 connect_adb
-                install_apk "$HOME/$APK"
+                install_apk "$HOME/$APK" "$NAME"
+                log_info "Đang khởi chạy ứng dụng..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
                 log_info "Cập nhật thành công!"
                 exit 0
                 ;;
-            0)
-                log_info "Cảm ơn bạn đã sử dụng!"
-                exit 0
-                ;;
-            *)
-                log_error "Lựa chọn không hợp lệ!"
-                sleep 2
-                ;;
+            0) exit 0 ;;
+            *) log_error "Lựa chọn không hợp lệ!"; sleep 2 ;;
         esac
     done
 }
