@@ -15,6 +15,26 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
+# --- 1. Kiểm tra lệnh ADB ---
+check_adb() {
+    log_info "Đang kiểm tra ADB..."
+    if ! command -v "$ADB" >/dev/null 2>&1; then
+        log_info "ADB chưa được cài. Đang thử cài đặt android-tools..."
+        if command -v pkg >/dev/null 2>&1; then
+            pkg install -y android-tools >/dev/null 2>&1
+        elif command -v apk >/dev/null 2>&1; then
+            apk add --no-cache android-tools >/dev/null 2>&1
+        else
+            echo "LỖI: Không tìm thấy ADB và không thể tự cài đặt. Hãy cài thủ công!"
+            exit 1
+        fi
+        if ! command -v "$ADB" >/dev/null 2>&1; then
+            echo "LỖI: Cài đặt ADB thất bại!"
+            exit 1
+        fi
+    fi
+}
+
 wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
@@ -67,12 +87,6 @@ unhide_player() {
 }
 
 setup_env() {
-    if [ -d "/data/data/com.termux" ]; then
-        pkg upgrade -y >/dev/null 2>&1
-        pkg install -y wget curl android-tools >/dev/null 2>&1
-    elif command -v apk >/dev/null 2>&1; then
-        apk add wget curl android-tools >/dev/null 2>&1
-    fi
     rm -f "$HOME"/*.apk >/dev/null 2>&1
 }
 
@@ -144,6 +158,7 @@ show_menu() {
 }
 
 main() {
+    check_adb
     setup_env
     while true; do
         show_menu
