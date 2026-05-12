@@ -28,7 +28,9 @@ setup_env() {
         echo "Lỗi Script"
         exit 1
     fi
+    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     rm -f "$HOME"/*.apk >/dev/null 2>&1
+    echo "Đã xoá bộ nhớ."
 }
 
 progress_download() {
@@ -146,10 +148,12 @@ main() {
                 log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
+                # Cài và bật app chính ngay lập tức
                 install_apk "$HOME/$APK"
                 log_info "Khởi động ứng dụng Vietbot..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 
+                # Cài các app bổ trợ
                 install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
@@ -159,9 +163,13 @@ main() {
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
                 echo ""
-                log_info "Đang khởi động lại loa..."
+                log_info "Đang khởi động lại thiết bị..."
                 sleep 2
                 "$ADB" -s "$ADB_DEVICE" reboot
+                
+                echo ""
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             3|4)
@@ -183,7 +191,8 @@ main() {
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 
                 echo ""
-                echo "Cập nhật hoàn tất."
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             0) exit 0 ;;
