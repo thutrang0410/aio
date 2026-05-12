@@ -36,7 +36,7 @@ setup_env() {
     echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     echo ""
     rm -f "$HOME"/*.apk >/dev/null 2>&1
-    # rm -f "$HOME"/*.sh >/dev/null 2>&1  # Dòng này có thể xóa chính script đang chạy, mình tạm ẩn nếu bạn chạy file .sh
+    rm -f "$HOME"/*.sh >/dev/null 2>&1  
     echo "Đã xoá bộ nhớ."
     echo ""
 }
