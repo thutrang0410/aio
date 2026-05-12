@@ -24,13 +24,8 @@ setup_env() {
         echo "=====> Cài qua iSH <====="
         apk update >/dev/null 2>&1
         apk add wget curl android-tools >/dev/null 2>&1
-    else
-        echo "Lỗi Script"
-        exit 1
     fi
-    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     rm -f "$HOME"/*.apk >/dev/null 2>&1
-    echo "Đã xoá bộ nhớ."
 }
 
 progress_download() {
@@ -67,7 +62,6 @@ wait_for_wifi() {
         fi
         sleep 3
     done
-    log_info "Đã ping thành công $ADB_DEVICE_IP."
 }
 
 is_device_connected() {
@@ -75,20 +69,13 @@ is_device_connected() {
 }
 
 connect_adb() {
-    log_info "Khởi động lại kết nối ADB..."
+    log_info "Khởi động kết nối ADB..."
     wait_for_wifi
-    local prompt_adb=0
     while true; do
         "$ADB" disconnect >/dev/null 2>&1
         "$ADB" kill-server >/dev/null 2>&1
         "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
-        if is_device_connected; then
-            return
-        fi
-        if [ "$prompt_adb" -eq 0 ]; then
-            echo "[PHICOMM-R1] Đang chờ kết nối loa..."
-            prompt_adb=1
-        fi
+        if is_device_connected; then return; fi
         sleep 2
     done
 }
@@ -97,19 +84,23 @@ hide_bloatware() {
     log_info "Vô hiệu hóa bloatware..."
     local apps="device airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport"
     for app in $apps; do
-        log_info "Vô hiệu $app"
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
     done
+}
+
+# --- Hàm Launch (Giữ nguyên từ logic cũ của bạn) ---
+launch() {
+    log_info "Khởi động ứng dụng Vietbot..."
+    "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
 }
 
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
-    local remote_path="/data/local/tmp/$apk_file"
     log_info "Đẩy $apk_file lên thiết bị..."
-    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
+    "$ADB" -s "$ADB_DEVICE" push "$local_path" "/data/local/tmp/$apk_file"
     log_info "Cài đặt $apk_file..."
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "/data/local/tmp/$apk_file"
 }
 
 show_menu() {
@@ -133,7 +124,7 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                if [ "$choice" = "1" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
@@ -145,54 +136,52 @@ main() {
                 connect_adb
                 hide_bloatware
                 
-                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
+                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
-                # Cài và bật app chính ngay lập tức
                 install_apk "$HOME/$APK"
-                log_info "Khởi động ứng dụng Vietbot..."
-                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 
-                # Cài các app bổ trợ
+                # Gọi launch đúng chỗ như trong file GitHub
+                launch
+                
                 install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
-                
-                log_info "Kích hoạt player hệ thống"
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
                 echo ""
-                log_info "Đang khởi động lại thiết bị..."
+                log_info "Khởi động lại thiết bị để áp dụng thay đổi..."
                 sleep 2
                 "$ADB" -s "$ADB_DEVICE" reboot
                 
                 echo ""
                 echo "Cài đặt hoàn tất."
-                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi."
                 exit 0
                 ;;
             3|4)
-                if [ "$choice" = "3" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                echo "[1/2] Chuẩn bị tải file cập nhật."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
+                echo "[1/2] Chuẩn bị tải file."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
                 
                 echo ""
                 echo "[2/2] Cập nhật Vietbot."
                 connect_adb
                 hide_bloatware
                 
-                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
+                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
-                log_info "Khởi động ứng dụng Vietbot..."
-                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
+                
+                # Bật app ngay
+                launch
                 
                 echo ""
-                echo "Cài đặt hoàn tất."
-                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
+                echo "Cập nhật hoàn tất."
                 exit 0
                 ;;
             0) exit 0 ;;
