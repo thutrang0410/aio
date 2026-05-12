@@ -111,7 +111,7 @@ install_apk() {
 show_menu() {
     clear
     echo "===================================="
-    echo "||  CÀI ĐẶT VIETBOT BY THU TRANG  ||"
+    echo "||   CÀI ĐẶT VIETBOT ALL-IN-ONE   ||"
     echo "===================================="
     echo " 1. Cài Full 3 Apps (Free)"
     echo " 2. Cài Full 3 Apps (Premium)"
