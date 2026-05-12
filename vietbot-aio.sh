@@ -15,14 +15,53 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
+# --- 1. Hàm chờ Wifi (Dừng hẳn để chờ Ping) ---
+wait_for_wifi() {
+    local prompt_shown=0
+    while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
+        if [ "$prompt_shown" -eq 0 ]; then
+            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
+            prompt_shown=1
+        fi
+        sleep 3
+    done
+    log_info "Đã ping thành công tới loa."
+}
+
+# --- 2. Hàm kiểm tra kết nối ---
+is_device_connected() {
+    "$ADB" devices 2>/dev/null | grep -q "$ADB_DEVICE.*device"
+}
+
+# --- 3. Hàm kết nối ADB (Dừng chờ đúng như bản gốc) ---
+connect_adb() {
+    log_info "Đang khởi động kết nối ADB..."
+    wait_for_wifi
+    local prompt_adb=0
+    while true; do
+        "$ADB" disconnect >/dev/null 2>&1
+        "$ADB" kill-server >/dev/null 2>&1
+        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
+        if is_device_connected; then
+            log_info "Đã kết nối thành công!"
+            return
+        fi
+        if [ "$prompt_adb" -eq 0 ]; then
+            echo "[PHICOMM-R1] Đang chờ ADB sẵn sàng, vui lòng đợi..."
+            prompt_adb=1
+        fi
+        sleep 5
+    done
+}
+
 hide_bloatware() {
     echo "------------------------------------"
-    log_info "Đang dọn dẹp hệ thống (Bloatware)..."
+    log_info "Đang dọn dẹp ứng dụng rác..."
     local apps="device airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport"
     for app in $apps; do
         printf "  [+] Đang ẩn: %-18s " "$app"
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-        echo "[Xong]"
+        echo "[OK]"
     done
 }
 
@@ -65,30 +104,6 @@ progress_download() {
     printf "\r[##########] 100%%\n"
 }
 
-connect_adb() {
-    log_info "Đang kiểm tra kết nối tới loa..."
-    if ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; then
-        echo ">>> HÃY KẾT NỐI WIFI TỚI LOA PHICOMM R1 <<<"
-        while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
-            sleep 3
-        done
-        log_info "Đã nhận thấy loa trong mạng."
-    fi
-
-    while true; do
-        # Kiểm tra xem đã kết nối sẵn chưa
-        if "$ADB" devices | grep -q "$ADB_DEVICE.*device"; then
-            log_info "Đã kết nối ADB thành công."
-            return 0
-        fi
-        
-        # Thử kết nối mới
-        "$ADB" disconnect "$ADB_DEVICE" >/dev/null 2>&1
-        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
-        sleep 2
-    done
-}
-
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
@@ -120,7 +135,6 @@ main() {
             1|2)
                 [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                echo "[1/2] Đang tải các ứng dụng..."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
@@ -128,9 +142,7 @@ main() {
                 connect_adb
                 hide_bloatware
                 
-                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
-                
                 install_apk "$HOME/$APK"
                 unhide_player
                 install_apk "$HOME/$DLNA_APK"
@@ -140,29 +152,24 @@ main() {
                 unhide_player
                 
                 echo ""
-                log_info "Đang khởi động lại loa..."
+                log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Cài đặt hoàn tất!"
                 exit 0
                 ;;
             3|4)
                 [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                echo "[1/2] Đang tải bản cập nhật..."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Bản cập nhật"
                 
                 connect_adb
                 hide_bloatware
                 
-                log_info "Đang cập nhật Vietbot..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
                 install_apk "$HOME/$APK"
-                
                 unhide_player
-                log_info "Đang khởi động ứng dụng..."
-                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
                 
-                echo "Cập nhật thành công!"
+                log_info "Khởi động ứng dụng..."
+                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
                 exit 0
                 ;;
             0) exit 0 ;;
