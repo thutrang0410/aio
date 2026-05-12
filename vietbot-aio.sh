@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# Cấu hình
 ADB_DEVICE_IP="192.168.43.1"
 ADB_DEVICE_PORT="5555"
 ADB_DEVICE="$ADB_DEVICE_IP:$ADB_DEVICE_PORT"
@@ -18,33 +17,25 @@ log_info() { echo "[PHICOMM-R1] $*"; }
 
 hide_bloatware() {
     echo "------------------------------------"
-    log_info "Đang ẩn files hệ thống (Bloatware)..."
-    # Danh sách đầy đủ: device, airskill, exceptionreporter, ijetty, netctl, systemtool, otaservice, productiontest, bugreport
+    log_info "Đang dọn dẹp hệ thống (Bloatware)..."
     local apps="device airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport"
     for app in $apps; do
-        printf "  [+] Đang vô hiệu hóa: %-18s " "$app"
+        printf "  [+] Đang ẩn: %-18s " "$app"
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-        echo "[OK]"
+        echo "[Xong]"
     done
 }
 
-# --- 2. Hàm hiện Player (Quan trọng cho âm thanh) ---
 unhide_player() {
-    log_info "Đang kích hoạt lại Player hệ thống..."
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
 }
 
 setup_env() {
     if [ -d "/data/data/com.termux" ]; then
-        echo "=====> Cài qua Termux <====="
         pkg upgrade -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
     elif command -v apk >/dev/null 2>&1; then
-        echo "=====> Cài qua iSH <====="
         apk add wget curl android-tools >/dev/null 2>&1
-    else
-        echo "Lỗi Script"
-        exit 1
     fi
     rm -f "$HOME"/*.apk >/dev/null 2>&1
 }
@@ -75,20 +66,27 @@ progress_download() {
 }
 
 connect_adb() {
-    log_info "Đang kết nối ADB tới $ADB_DEVICE..."
-    while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
-        echo "Vui lòng kết nối Wifi tới loa Phicomm R1..."
-        sleep 3
-    done
-    "$ADB" disconnect >/dev/null 2>&1
-    "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
-    if "$ADB" devices | grep -q "$ADB_DEVICE.*device"; then
-        log_info "Đã kết nối thành công."
-    else
-        log_info "Lỗi kết nối, đang thử lại..."
-        sleep 2
-        connect_adb
+    log_info "Đang kiểm tra kết nối tới loa..."
+    if ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; then
+        echo ">>> HÃY KẾT NỐI WIFI TỚI LOA PHICOMM R1 <<<"
+        while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
+            sleep 3
+        done
+        log_info "Đã nhận thấy loa trong mạng."
     fi
+
+    while true; do
+        # Kiểm tra xem đã kết nối sẵn chưa
+        if "$ADB" devices | grep -q "$ADB_DEVICE.*device"; then
+            log_info "Đã kết nối ADB thành công."
+            return 0
+        fi
+        
+        # Thử kết nối mới
+        "$ADB" disconnect "$ADB_DEVICE" >/dev/null 2>&1
+        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
+        sleep 2
+    done
 }
 
 install_apk() {
@@ -104,10 +102,10 @@ show_menu() {
     echo "===================================="
     echo "||  CÀI ĐẶT VIETBOT BY THU TRANG  ||"
     echo "===================================="
-    echo " 1. Cài Full 3 Apps (Free)"
+    echo " 1. Cài Full 3 Apps (Miễn phí)"
     echo " 2. Cài Full 3 Apps (Premium)"
-    echo " 3. Update Free"
-    echo " 4. Update Premium"
+    echo " 3. Cập nhật bản Miễn phí"
+    echo " 4. Cập nhật bản Premium"
     echo " 0. Thoát"
     echo "===================================="
     printf "Chọn số (0-4): "
@@ -120,48 +118,40 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                if [ "$choice" = "1" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
+                echo "[1/2] Đang tải các ứng dụng..."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
                 connect_adb
-                
-                # Bước 1: Dọn dẹp máy trước
                 hide_bloatware
                 
-                # Bước 2: Cài Vietbot chính
-                log_info "Đang gỡ bản cũ..."
+                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
+                
                 install_apk "$HOME/$APK"
-                
                 unhide_player
-                
-                # Bước 4: Cài DLNA & Unisound
                 install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
-                # Cấp quyền cài đặt
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1 >/dev/null 2>&1
-                
-                # Đảm bảo Player vẫn hiện trước khi kết thúc
                 unhide_player
                 
                 echo ""
-                log_info "Khởi động lại thiết bị..."
+                log_info "Đang khởi động lại loa..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Xong! Chờ loa khởi động lại."
+                echo "Cài đặt hoàn tất!"
                 exit 0
                 ;;
             3|4)
-                if [ "$choice" = "3" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
+                [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Bản cập nhật"
+                echo "[1/2] Đang tải bản cập nhật..."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
                 
                 connect_adb
-                
-                # Update cũng dọn dẹp bloatware
                 hide_bloatware
                 
                 log_info "Đang cập nhật Vietbot..."
@@ -169,8 +159,7 @@ main() {
                 install_apk "$HOME/$APK"
                 
                 unhide_player
-                
-                log_info "Khởi động ứng dụng..."
+                log_info "Đang khởi động ứng dụng..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
                 
                 echo "Cập nhật thành công!"
