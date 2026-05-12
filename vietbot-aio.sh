@@ -15,7 +15,6 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
-# --- 1. Hàm chờ Wifi (Dừng hẳn để chờ Ping) ---
 wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
@@ -28,7 +27,6 @@ wait_for_wifi() {
     log_info "Đã ping thành công tới loa."
 }
 
-# --- 2. Hàm kiểm tra kết nối ---
 is_device_connected() {
     "$ADB" devices 2>/dev/null | grep -q "$ADB_DEVICE.*device"
 }
