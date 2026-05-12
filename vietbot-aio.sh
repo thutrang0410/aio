@@ -77,11 +77,16 @@ is_device_connected() {
 connect_adb() {
     log_info "Khởi động kết nối ADB..."
     wait_for_wifi
+    local prompt_adb=0
     while true; do
         "$ADB" disconnect >/dev/null 2>&1
         "$ADB" kill-server >/dev/null 2>&1
         "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
         if is_device_connected; then return; fi
+        if [ "$prompt_adb" -eq 0 ]; then
+            echo "[PHICOMM-R1] Đang chờ kết nối loa..."
+            prompt_adb=1
+        fi
         sleep 2
     done
 }
@@ -102,10 +107,11 @@ launch() {
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
+    local remote_path="/data/local/tmp/$apk_file"
     log_info "Đẩy $apk_file lên thiết bị..."
-    "$ADB" -s "$ADB_DEVICE" push "$local_path" "/data/local/tmp/$apk_file"
+    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
     log_info "Cài đặt $apk_file..."
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "/data/local/tmp/$apk_file"
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
 }
 
 show_menu() {
@@ -154,7 +160,7 @@ main() {
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
                 echo ""
-                log_info "Đang khởi động lại loa..."
+                log_info "Đang khởi động lại thiết bị..."
                 sleep 2
                 "$ADB" -s "$ADB_DEVICE" reboot
                 
@@ -177,8 +183,8 @@ main() {
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
-                # Cài đặt và Launch
                 install_apk "$HOME/$APK"
+                
                 launch
                 
                 echo ""
