@@ -1,3 +1,26 @@
+Mình hiểu ý bạn. Việc ẩn các dòng thông báo của ADB giúp script trông "sạch" hơn nhưng lại khiến bạn không biết kết quả thực tế là thành công hay thất bại (như dòng chữ `Success` quen thuộc của Android).
+
+Mình sẽ bỏ phần ẩn thông báo (`>/dev/null 2>&1`) ở các lệnh **Cài đặt** và **Gỡ bỏ** để bạn có thể nhìn thấy trực tiếp kết quả từ loa trả về.
+
+Đây là hàm `install_apk` và đoạn gỡ bản cũ đã được mở thông báo:
+
+```bash
+install_apk() {
+    # ... đoạn push file giữ nguyên ...
+
+    # Mở thông báo để hiện Success hoặc Failure
+    log_info "Đang cài đặt $apk_file..."
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
+}
+
+# Trong hàm main:
+log_info "Đang gỡ bỏ bản cũ (nếu có)..."
+"$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
+```
+
+Bản Script đầy đủ (đã hiện thông báo cài đặt):
+
+```bash
 #!/bin/sh
 
 ADB_DEVICE_IP="192.168.43.1"
@@ -15,9 +38,8 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
-# --- 1. Kiểm tra ADB (Chạy ngay khi mở script) ---
 check_adb() {
-    log_info "Đang kiểm tra hệ thống..."
+    log_info "Đang kiểm tra ADB..."
     if ! command -v "$ADB" >/dev/null 2>&1; then
         log_info "ADB chưa được cài. Đang thử cài đặt android-tools..."
         if command -v pkg >/dev/null 2>&1; then
@@ -28,13 +50,11 @@ check_adb() {
             echo "LỖI: Không tìm thấy ADB và không thể tự cài đặt. Hãy cài thủ công!"
             exit 1
         fi
-        
         if ! command -v "$ADB" >/dev/null 2>&1; then
             echo "LỖI: Cài đặt ADB thất bại!"
             exit 1
         fi
     fi
-    log_info "ADB đã sẵn sàng."
 }
 
 wait_for_wifi() {
@@ -141,8 +161,9 @@ install_apk() {
     wait $pid
     printf "\r[##########] 100%%\n"
 
+    # Hiện thông báo cài đặt (Success/Failure)
     log_info "Đang cài đặt $apk_file..."
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
 }
 
 show_menu() {
@@ -160,9 +181,7 @@ show_menu() {
 }
 
 main() {
-    # Kiểm tra ADB trước tiên
     check_adb
-    
     setup_env
     while true; do
         show_menu
@@ -179,8 +198,8 @@ main() {
                 connect_adb
                 hide_bloatware
                 
-                log_info "Dọn dẹp bản cũ..."
-                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
+                log_info "Đang gỡ bỏ bản cũ (nếu có)..."
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
                 unhide_player
@@ -193,7 +212,7 @@ main() {
                 echo ""
                 log_info "Đang khởi động lại loa..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Hoàn tất!"
+                echo "Cài đặt hoàn tất!"
                 exit 0
                 ;;
             3|4)
@@ -205,13 +224,14 @@ main() {
                 connect_adb
                 hide_bloatware
                 
-                log_info "Cập nhật Vietbot..."
-                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
+                log_info "Đang gỡ bỏ bản cũ (nếu có)..."
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
+                
                 install_apk "$HOME/$APK"
                 unhide_player
                 
                 log_info "Đang khởi động ứng dụng..."
-                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
+                "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
                 echo "Cập nhật hoàn tất!"
                 exit 0
                 ;;
@@ -222,3 +242,4 @@ main() {
 }
 
 main
+```
