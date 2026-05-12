@@ -1,12 +1,3 @@
-[ignoring loop detection]
-
-Dạ, đúng là bản gốc đầu tiên của bạn ở phần **Update** (mục 3 và 4) không có lệnh ẩn bloatware, nên khi mình giữ nguyên logic cũ thì nó bị thiếu. 
-
-Mình đã bổ sung lệnh `hide_bloatware` vào cả phần Update theo ý bạn. Bây giờ cả 4 menu đều sẽ thực hiện dọn dẹp ứng dụng rác.
-
-Đây là bản script đã bổ sung:
-
-```bash
 #!/bin/sh
 
 ADB_DEVICE_IP="192.168.43.1"
