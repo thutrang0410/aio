@@ -24,14 +24,13 @@ wait_for_wifi() {
         fi
         sleep 3
     done
-    log_info "Đã ping thành công tới loa."
+    log_info "Đã nhận được tín hiệu từ loa."
 }
 
 is_device_connected() {
     "$ADB" devices 2>/dev/null | grep -q "$ADB_DEVICE.*device"
 }
 
-# --- 3. Hàm kết nối ADB (Dừng chờ đúng như bản gốc) ---
 connect_adb() {
     log_info "Đang khởi động kết nối ADB..."
     wait_for_wifi
@@ -105,9 +104,29 @@ progress_download() {
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
+    local remote_path="/data/local/tmp/$apk_file"
+    local total_size=$(wc -c < "$local_path")
+
+    echo "Đang đẩy $apk_file lên loa..."
+    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path" >/dev/null 2>&1 &
+    local pid=$!
+
+    while kill -0 $pid 2>/dev/null; do
+        local current_size=$("$ADB" -s "$ADB_DEVICE" shell ls -l "$remote_path" 2>/dev/null | awk '{print $4}')
+        if [ -n "$current_size" ] && [ "$current_size" -eq "$current_size" ] 2>/dev/null; then
+            local percent=$((current_size * 100 / total_size))
+            [ "$percent" -gt 100 ] && percent=100
+            local bars=$((percent / 10))
+            local done_bar=$(printf "%${bars}s" | tr ' ' '#')
+            printf "\r[%-10s] %3d%%" "$done_bar" "$percent"
+        fi
+        sleep 0.5
+    done
+    wait $pid
+    printf "\r[##########] 100%%\n"
+
     log_info "Đang cài đặt $apk_file..."
-    "$ADB" -s "$ADB_DEVICE" push "$local_path" "/data/local/tmp/$apk_file" >/dev/null 2>&1
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "/data/local/tmp/$apk_file" >/dev/null 2>&1
+    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path" >/dev/null 2>&1
 }
 
 show_menu() {
@@ -133,6 +152,7 @@ main() {
             1|2)
                 [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
+                echo "[1/2] Đang tải các ứng dụng..."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
@@ -140,7 +160,9 @@ main() {
                 connect_adb
                 hide_bloatware
                 
+                log_info "Dọn dẹp bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
+                
                 install_apk "$HOME/$APK"
                 unhide_player
                 install_apk "$HOME/$DLNA_APK"
@@ -150,24 +172,28 @@ main() {
                 unhide_player
                 
                 echo ""
-                log_info "Khởi động lại thiết bị..."
+                log_info "Đang khởi động lại loa..."
                 "$ADB" -s "$ADB_DEVICE" reboot
+                echo "Hoàn tất!"
                 exit 0
                 ;;
             3|4)
                 [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Bản cập nhật"
+                echo "[1/2] Đang tải bản cập nhật..."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
                 
                 connect_adb
                 hide_bloatware
                 
+                log_info "Cập nhật Vietbot..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME" >/dev/null 2>&1
                 install_apk "$HOME/$APK"
                 unhide_player
                 
-                log_info "Khởi động ứng dụng..."
+                log_info "Đang khởi động ứng dụng..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity" >/dev/null 2>&1
+                echo "Cập nhật hoàn tất!"
                 exit 0
                 ;;
             0) exit 0 ;;
