@@ -1,10 +1,3 @@
-Mình đã xem lại kỹ logic gốc của bạn. Có vẻ như iSH không chạy được là do mình đã thay đổi cách kiểm tra môi trường (từ kiểm tra thư mục sang kiểm tra lệnh) và thiếu các thông báo chờ đặc trưng của iSH.
-
-Mình sẽ khôi phục lại **y hệt** khối lệnh `setup_env` và cách kiểm tra môi trường của bạn, đồng thời chỉ bổ sung tiếng Việt có dấu và các Menu mới.
-
-Đây là bản script chạy chuẩn cho cả iSH và Termux:
-
-```bash
 #!/bin/sh
 
 ADB_DEVICE_IP="192.168.43.1"
@@ -22,7 +15,6 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
-# --- 1. Khôi phục logic Setup cũ của bạn ---
 setup_env() {
     if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
@@ -36,8 +28,6 @@ setup_env() {
         echo ""
         echo "Vui lòng chờ cài đặt các gói."
         echo ""
-        # Thêm apk update để chắc chắn iSH tìm thấy gói
-        apk update >/dev/null 2>&1
         apk add wget curl android-tools >/dev/null 2>&1
     else
         echo "Lỗi Script"
@@ -46,60 +36,9 @@ setup_env() {
     echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     echo ""
     rm -f "$HOME"/*.apk >/dev/null 2>&1
-    # Không xóa *.sh ở đây để tránh xóa chính script đang chạy
+    # rm -f "$HOME"/*.sh >/dev/null 2>&1  # Dòng này có thể xóa chính script đang chạy, mình tạm ẩn nếu bạn chạy file .sh
     echo "Đã xoá bộ nhớ."
     echo ""
-}
-
-# --- 2. Logic chờ và kết nối (Giữ nguyên bản gốc) ---
-wait_for_wifi() {
-    local prompt_shown=0
-    while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
-        if [ "$prompt_shown" -eq 0 ]; then
-            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
-            prompt_shown=1
-        fi
-        sleep 3
-    done
-    log_info "Đã ping thành công $ADB_DEVICE_IP."
-}
-
-is_device_connected() {
-    "$ADB" devices 2>/dev/null | grep -q "$ADB_DEVICE.*device"
-}
-
-connect_adb() {
-    log_info "Khởi động lại kết nối ADB..."
-    wait_for_wifi
-    local prompt_adb=0
-    while true; do
-        "$ADB" disconnect >/dev/null 2>&1
-        "$ADB" kill-server >/dev/null 2>&1
-        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
-        if is_device_connected; then
-            log_info "Kết nối ADB thành công!"
-            return
-        fi
-        if [ "$prompt_adb" -eq 0 ]; then
-            echo "[PHICOMM-R1] Đang thử lại kết nối ADB..."
-            prompt_adb=1
-        fi
-        sleep 5
-    done
-}
-
-hide_bloatware() {
-    echo "------------------------------------"
-    log_info "Vô hiệu hóa bloatware..."
-    local apps="device airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport"
-    for app in $apps; do
-        log_info "Vô hiệu $app"
-        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-    done
-}
-
-unhide_player() {
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
 }
 
 progress_download() {
@@ -127,14 +66,56 @@ progress_download() {
     printf "\r[##########] 100%%\n"
 }
 
+wait_for_wifi() {
+    local prompt_shown=0
+    while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
+        if [ "$prompt_shown" -eq 0 ]; then
+            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
+            prompt_shown=1
+        fi
+        sleep 3
+    done
+    log_info "Đã ping thành công $ADB_DEVICE_IP."
+}
+
+is_device_connected() {
+    "$ADB" devices 2>/dev/null | grep -q "$ADB_DEVICE.*device"
+}
+
+connect_adb() {
+    log_info "Khởi động lại kết nối ADB..."
+    wait_for_wifi
+    local prompt_adb=0
+    while true; do
+        "$ADB" disconnect >/dev/null 2>&1
+        "$ADB" kill-server >/dev/null 2>&1
+        "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
+        if is_device_connected; then
+            return
+        fi
+        if [ "$prompt_adb" -eq 0 ]; then
+            echo "[PHICOMM-R1] Đã thấy thiết bị nhưng ADB chưa sẵn sàng, đang thử lại..."
+            prompt_adb=1
+        fi
+        sleep 2
+    done
+}
+
+hide_bloatware() {
+    log_info "Vô hiệu hóa bloatware..."
+    local apps="device airskill exceptionreporter systemtool otaservice productiontest bugreport"
+    for app in $apps; do
+        log_info "Vô hiệu $app"
+        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app"
+    done
+}
+
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
     local remote_path="/data/local/tmp/$apk_file"
-    
-    log_info "Đẩy $apk_file lên thiết bị..."
+    log_info "Đẩy APKs lên thiết bị..."
     "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
-    
     log_info "Cài đặt $apk_file..."
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
 }
@@ -146,8 +127,8 @@ show_menu() {
     echo "===================================="
     echo " 1. Cài Full 3 Apps (Free)"
     echo " 2. Cài Full 3 Apps (Premium)"
-    echo " 3. Cập nhật Free"
-    echo " 4. Cập nhật Premium"
+    echo " 3. Update Free"
+    echo " 4. Update Premium"
     echo " 0. Thoát"
     echo "===================================="
     printf "Chọn số (0-4): "
@@ -160,54 +141,61 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2)
-                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
+                if [ "$choice" = "1" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
                 echo ""
-                echo "[1/2] Chuẩn bị tải file."
+                echo "[1/2] Chuẩn bị cài đặt."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
                 echo ""
-                echo "[2/2] Cài đặt lên loa."
+                echo "[2/2] Cài đặt Vietbot."
+                log_info "Kiểm tra Adb..."
                 connect_adb
                 hide_bloatware
                 
-                log_info "Gỡ bỏ bản cũ..."
+                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
-                unhide_player
                 install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
-                "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1 >/dev/null 2>&1
-                unhide_player
+                "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
+                
+                log_info "Kích hoạt player"
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player"
                 
                 echo ""
                 log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Hoàn tất!"
+                echo ""
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             3|4)
-                [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
+                if [ "$choice" = "3" ]; then APK=$FREE_APK; else APK=$PREMIUM_APK; fi
                 echo ""
-                echo "[1/2] Chuẩn bị tải file."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
+                echo "[1/2] Chuẩn bị cài đặt."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 
                 echo ""
-                echo "[2/2] Cài đặt cập nhật."
+                echo "[2/2] Cài đặt Vietbot."
+                log_info "Kiểm tra Adb..."
                 connect_adb
-                hide_bloatware
                 
-                log_info "Gỡ bỏ bản cũ..."
+                log_info "Kiểm tra làm sạch thiết bị trước khi cài đặt..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
-                unhide_player
                 
                 log_info "Khởi động ứng dụng..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
+                
+                echo ""
+                echo "Cài đặt hoàn tất."
+                echo "Vào wifi Phicomm R1, truy cập http://192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
                 exit 0
                 ;;
             0) exit 0 ;;
@@ -217,4 +205,3 @@ main() {
 }
 
 main
-```
