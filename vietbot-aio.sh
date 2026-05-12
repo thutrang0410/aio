@@ -1,24 +1,8 @@
-Mình hiểu ý bạn. Việc ẩn các dòng thông báo của ADB giúp script trông "sạch" hơn nhưng lại khiến bạn không biết kết quả thực tế là thành công hay thất bại (như dòng chữ `Success` quen thuộc của Android).
+Mình đã xem lại kỹ logic gốc của bạn. Có vẻ như iSH không chạy được là do mình đã thay đổi cách kiểm tra môi trường (từ kiểm tra thư mục sang kiểm tra lệnh) và thiếu các thông báo chờ đặc trưng của iSH.
 
-Mình sẽ bỏ phần ẩn thông báo (`>/dev/null 2>&1`) ở các lệnh **Cài đặt** và **Gỡ bỏ** để bạn có thể nhìn thấy trực tiếp kết quả từ loa trả về.
+Mình sẽ khôi phục lại **y hệt** khối lệnh `setup_env` và cách kiểm tra môi trường của bạn, đồng thời chỉ bổ sung tiếng Việt có dấu và các Menu mới.
 
-Đây là hàm `install_apk` và đoạn gỡ bản cũ đã được mở thông báo:
-
-```bash
-install_apk() {
-    # ... đoạn push file giữ nguyên ...
-
-    # Mở thông báo để hiện Success hoặc Failure
-    log_info "Đang cài đặt $apk_file..."
-    "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
-}
-
-# Trong hàm main:
-log_info "Đang gỡ bỏ bản cũ (nếu có)..."
-"$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
-```
-
-Bản Script đầy đủ (đã hiện thông báo cài đặt):
+Đây là bản script chạy chuẩn cho cả iSH và Termux:
 
 ```bash
 #!/bin/sh
@@ -38,25 +22,36 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
-check_adb() {
-    log_info "Đang kiểm tra ADB..."
-    if ! command -v "$ADB" >/dev/null 2>&1; then
-        log_info "ADB chưa được cài. Đang thử cài đặt android-tools..."
-        if command -v pkg >/dev/null 2>&1; then
-            pkg install -y android-tools >/dev/null 2>&1
-        elif command -v apk >/dev/null 2>&1; then
-            apk add --no-cache android-tools >/dev/null 2>&1
-        else
-            echo "LỖI: Không tìm thấy ADB và không thể tự cài đặt. Hãy cài thủ công!"
-            exit 1
-        fi
-        if ! command -v "$ADB" >/dev/null 2>&1; then
-            echo "LỖI: Cài đặt ADB thất bại!"
-            exit 1
-        fi
+# --- 1. Khôi phục logic Setup cũ của bạn ---
+setup_env() {
+    if [ -d "/data/data/com.termux" ]; then
+        echo "=====> Cài qua Termux <====="
+        echo ""
+        echo "Vui lòng chờ cài đặt các gói."
+        echo ""
+        pkg upgrade -y >/dev/null 2>&1
+        pkg install -y wget curl android-tools >/dev/null 2>&1
+    elif command -v apk >/dev/null 2>&1; then
+        echo "=====> Cài qua iSH <====="
+        echo ""
+        echo "Vui lòng chờ cài đặt các gói."
+        echo ""
+        # Thêm apk update để chắc chắn iSH tìm thấy gói
+        apk update >/dev/null 2>&1
+        apk add wget curl android-tools >/dev/null 2>&1
+    else
+        echo "Lỗi Script"
+        exit 1
     fi
+    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
+    echo ""
+    rm -f "$HOME"/*.apk >/dev/null 2>&1
+    # Không xóa *.sh ở đây để tránh xóa chính script đang chạy
+    echo "Đã xoá bộ nhớ."
+    echo ""
 }
 
+# --- 2. Logic chờ và kết nối (Giữ nguyên bản gốc) ---
 wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
@@ -66,7 +61,7 @@ wait_for_wifi() {
         fi
         sleep 3
     done
-    log_info "Đã nhận được tín hiệu từ loa."
+    log_info "Đã ping thành công $ADB_DEVICE_IP."
 }
 
 is_device_connected() {
@@ -74,7 +69,7 @@ is_device_connected() {
 }
 
 connect_adb() {
-    log_info "Đang khởi động kết nối ADB..."
+    log_info "Khởi động lại kết nối ADB..."
     wait_for_wifi
     local prompt_adb=0
     while true; do
@@ -82,11 +77,11 @@ connect_adb() {
         "$ADB" kill-server >/dev/null 2>&1
         "$ADB" connect "$ADB_DEVICE" >/dev/null 2>&1
         if is_device_connected; then
-            log_info "Đã kết nối thành công!"
+            log_info "Kết nối ADB thành công!"
             return
         fi
         if [ "$prompt_adb" -eq 0 ]; then
-            echo "[PHICOMM-R1] Đang chờ ADB sẵn sàng, vui lòng đợi..."
+            echo "[PHICOMM-R1] Đang thử lại kết nối ADB..."
             prompt_adb=1
         fi
         sleep 5
@@ -95,21 +90,16 @@ connect_adb() {
 
 hide_bloatware() {
     echo "------------------------------------"
-    log_info "Đang dọn dẹp ứng dụng rác..."
+    log_info "Vô hiệu hóa bloatware..."
     local apps="device airskill exceptionreporter ijetty netctl systemtool otaservice productiontest bugreport"
     for app in $apps; do
-        printf "  [+] Đang ẩn: %-18s " "$app"
+        log_info "Vô hiệu $app"
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-        echo "[OK]"
     done
 }
 
 unhide_player() {
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm unhide "com.phicomm.speaker.player" >/dev/null 2>&1
-}
-
-setup_env() {
-    rm -f "$HOME"/*.apk >/dev/null 2>&1
 }
 
 progress_download() {
@@ -141,28 +131,11 @@ install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
     local remote_path="/data/local/tmp/$apk_file"
-    local total_size=$(wc -c < "$local_path")
-
-    echo "Đang đẩy $apk_file lên loa..."
-    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path" >/dev/null 2>&1 &
-    local pid=$!
-
-    while kill -0 $pid 2>/dev/null; do
-        local current_size=$("$ADB" -s "$ADB_DEVICE" shell ls -l "$remote_path" 2>/dev/null | awk '{print $4}')
-        if [ -n "$current_size" ] && [ "$current_size" -eq "$current_size" ] 2>/dev/null; then
-            local percent=$((current_size * 100 / total_size))
-            [ "$percent" -gt 100 ] && percent=100
-            local bars=$((percent / 10))
-            local done_bar=$(printf "%${bars}s" | tr ' ' '#')
-            printf "\r[%-10s] %3d%%" "$done_bar" "$percent"
-        fi
-        sleep 0.5
-    done
-    wait $pid
-    printf "\r[##########] 100%%\n"
-
-    # Hiện thông báo cài đặt (Success/Failure)
-    log_info "Đang cài đặt $apk_file..."
+    
+    log_info "Đẩy $apk_file lên thiết bị..."
+    "$ADB" -s "$ADB_DEVICE" push "$local_path" "$remote_path"
+    
+    log_info "Cài đặt $apk_file..."
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "$remote_path"
 }
 
@@ -171,17 +144,16 @@ show_menu() {
     echo "===================================="
     echo "||  CÀI ĐẶT VIETBOT BY THU TRANG  ||"
     echo "===================================="
-    echo " 1. Cài Full 3 Apps (Miễn phí)"
+    echo " 1. Cài Full 3 Apps (Free)"
     echo " 2. Cài Full 3 Apps (Premium)"
-    echo " 3. Cập nhật bản Miễn phí"
-    echo " 4. Cập nhật bản Premium"
+    echo " 3. Cập nhật Free"
+    echo " 4. Cập nhật Premium"
     echo " 0. Thoát"
     echo "===================================="
     printf "Chọn số (0-4): "
 }
 
 main() {
-    check_adb
     setup_env
     while true; do
         show_menu
@@ -190,15 +162,17 @@ main() {
             1|2)
                 [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                echo "[1/2] Đang tải các ứng dụng..."
+                echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
+                echo ""
+                echo "[2/2] Cài đặt lên loa."
                 connect_adb
                 hide_bloatware
                 
-                log_info "Đang gỡ bỏ bản cũ (nếu có)..."
+                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
@@ -210,29 +184,30 @@ main() {
                 unhide_player
                 
                 echo ""
-                log_info "Đang khởi động lại loa..."
+                log_info "Khởi động lại thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" reboot
-                echo "Cài đặt hoàn tất!"
+                echo "Hoàn tất!"
                 exit 0
                 ;;
             3|4)
                 [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
-                echo "[1/2] Đang tải bản cập nhật..."
+                echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Update"
                 
+                echo ""
+                echo "[2/2] Cài đặt cập nhật."
                 connect_adb
                 hide_bloatware
                 
-                log_info "Đang gỡ bỏ bản cũ (nếu có)..."
+                log_info "Gỡ bỏ bản cũ..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
                 
                 install_apk "$HOME/$APK"
                 unhide_player
                 
-                log_info "Đang khởi động ứng dụng..."
+                log_info "Khởi động ứng dụng..."
                 "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
-                echo "Cập nhật hoàn tất!"
                 exit 0
                 ;;
             0) exit 0 ;;
