@@ -15,9 +15,9 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
-# --- 1. Kiểm tra lệnh ADB ---
+# --- 1. Kiểm tra ADB (Chạy ngay khi mở script) ---
 check_adb() {
-    log_info "Đang kiểm tra ADB..."
+    log_info "Đang kiểm tra hệ thống..."
     if ! command -v "$ADB" >/dev/null 2>&1; then
         log_info "ADB chưa được cài. Đang thử cài đặt android-tools..."
         if command -v pkg >/dev/null 2>&1; then
@@ -28,11 +28,13 @@ check_adb() {
             echo "LỖI: Không tìm thấy ADB và không thể tự cài đặt. Hãy cài thủ công!"
             exit 1
         fi
+        
         if ! command -v "$ADB" >/dev/null 2>&1; then
             echo "LỖI: Cài đặt ADB thất bại!"
             exit 1
         fi
     fi
+    log_info "ADB đã sẵn sàng."
 }
 
 wait_for_wifi() {
@@ -158,7 +160,9 @@ show_menu() {
 }
 
 main() {
+    # Kiểm tra ADB trước tiên
     check_adb
+    
     setup_env
     while true; do
         show_menu
