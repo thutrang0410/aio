@@ -30,14 +30,6 @@ setup_env() {
         echo "=====> Cài qua macOS <====="
         brew install wget curl android-platform-tools >/dev/null 2>&1
 
-    elif uname | grep -qiE "mingw|msys"; then
-        echo "=====> Git Bash Windows <====="
-
-        if ! command -v adb >/dev/null 2>&1; then
-            echo "Thiếu adb."
-            exit 1
-        fi
-
     else
         echo "Không hỗ trợ môi trường này."
         exit 1
