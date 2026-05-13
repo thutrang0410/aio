@@ -16,26 +16,27 @@ UNI_SOUND_APK="uni-sound.apk"
 log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
-if [ -d "/data/data/com.termux" ]; then
-    echo "=====> Cài qua Termux <====="
+    if [ -d "/data/data/com.termux" ]; then
+        echo "=====> Cài qua Termux <====="
 
-    pkg upgrade -y >/dev/null 2>&1
-    pkg install -y wget curl android-tools >/dev/null 2>&1
+        pkg upgrade -y >/dev/null 2>&1
+        pkg install -y wget curl android-tools >/dev/null 2>&1
 
-elif command -v apk >/dev/null 2>&1; then
-    echo "=====> Cài qua iSH <====="
+    elif command -v apk >/dev/null 2>&1; then
+        echo "=====> Cài qua iSH <====="
 
-    apk update >/dev/null 2>&1
-    apk add wget curl android-tools >/dev/null 2>&1
+        apk update >/dev/null 2>&1
+        apk add wget curl android-tools >/dev/null 2>&1
 
-else
-    echo "Lỗi Script"
-    exit 1
-fi
+    else
+        echo "Lỗi Script"
+        exit 1
+    fi
 
-echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
-rm -f "$HOME"/*.apk >/dev/null 2>&1
-echo "Đã xoá bộ nhớ."
+    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
+    rm -f "$HOME"/*.apk >/dev/null 2>&1
+    echo "Đã xoá bộ nhớ."
+}
 
 progress_download() {
     url="$1"
