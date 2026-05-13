@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ADB_DEVICE_IP="192.168.43.1"
 ADB_DEVICE_PORT="5555"
