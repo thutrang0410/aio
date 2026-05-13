@@ -30,12 +30,11 @@ setup_env() {
         echo "=====> Cài qua macOS <====="
         brew install wget curl android-platform-tools >/dev/null 2>&1
 
-    elif command -v powershell.exe >/dev/null 2>&1; then
+    elif uname | grep -qiE "mingw|msys"; then
         echo "=====> Git Bash Windows <====="
 
         if ! command -v adb >/dev/null 2>&1; then
             echo "Thiếu adb."
-            echo "Hãy cài Android Platform Tools."
             exit 1
         fi
 
