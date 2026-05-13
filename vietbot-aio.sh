@@ -30,10 +30,24 @@ setup_env() {
         echo "=====> Cài qua macOS <====="
         brew install wget curl android-platform-tools >/dev/null 2>&1
 
+    elif command -v powershell.exe >/dev/null 2>&1; then
+        echo "=====> Git Bash Windows <====="
+
+        if ! command -v adb >/dev/null 2>&1; then
+            echo "Thiếu adb."
+            echo "Hãy cài Android Platform Tools."
+            exit 1
+        fi
+
     else
         echo "Không hỗ trợ môi trường này."
         exit 1
     fi
+
+    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
+    rm -f "$HOME"/*.apk >/dev/null 2>&1
+    echo "Đã xoá bộ nhớ."
+}
 
     echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
     rm -f "$HOME"/*.apk >/dev/null 2>&1
