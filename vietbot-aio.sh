@@ -38,11 +38,6 @@ setup_env() {
     echo "Đã xoá bộ nhớ."
 }
 
-    echo "Đã cài thành công, chờ xoá bộ nhớ cũ."
-    rm -f "$HOME"/*.apk >/dev/null 2>&1
-    echo "Đã xoá bộ nhớ."
-}
-
 progress_download() {
     url="$1"
     output="$2"
