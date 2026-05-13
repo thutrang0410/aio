@@ -16,7 +16,7 @@ UNI_SOUND_APK="uni-sound.apk"
 log_info() { echo "[PHICOMM-R1] $*"; }
 
 setup_env() {
-    if [ -d "/data/data/com.termux" ]; then
+   if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
         pkg upgrade -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
