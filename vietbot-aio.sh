@@ -18,18 +18,20 @@ log_info() { echo "[PHICOMM-R1] $*"; }
 setup_env() {
     if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
-
         pkg upgrade -y >/dev/null 2>&1
         pkg install -y wget curl android-tools >/dev/null 2>&1
 
     elif command -v apk >/dev/null 2>&1; then
         echo "=====> Cài qua iSH <====="
-
         apk update >/dev/null 2>&1
         apk add wget curl android-tools >/dev/null 2>&1
 
+    elif command -v brew >/dev/null 2>&1; then
+        echo "=====> Cài qua macOS <====="
+        brew install wget curl android-platform-tools >/dev/null 2>&1
+
     else
-        echo "Lỗi Script"
+        echo "Không hỗ trợ môi trường này."
         exit 1
     fi
 
