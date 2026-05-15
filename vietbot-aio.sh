@@ -8,9 +8,9 @@ ADB="adb"
 BASE_URL="https://github.com/thutrang0410/vietbot/releases/download/r1"
 PACKAGE_NAME="info.dourok.voicebot"
 
-AIBOX_APK="goc.apk"
 FREE_APK="free.apk"
 PREMIUM_APK="premium.apk"
+AIBOXPLUS_APK="goc.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
@@ -121,15 +121,15 @@ show_menu() {
     echo "====================================="
     echo "||  CÀI ĐẶT VOICEBOT ALL-IN-ONE    ||"
     echo "====================================="
-	echo " 1. Cài Full 3 Apps (AIBOX)"
-    echo " 2. Cài Full 3 Apps (Free)"
-    echo " 3. Cài Full 3 Apps (Premium)"
-	echo " 4. Update AIBOX"
-    echo " 5. Update Free"
-    echo " 6. Update Premium"
-    echo " 0. Thoát"
+	echo "|| 1. Cài Full 3 Apps (FREE)       ||"
+    echo "|| 2. Cài Full 3 Apps (PREMIUM)    ||"
+    echo "|| 3. Cài Full 3 Apps (AIBOXPLUS)  ||"
+	echo "|| 4. Cài đặt VIETBOT-FREE         ||"
+    echo "|| 5. Cài đặt VIETBOT-PREMIUM      ||"
+    echo "|| 6. Cài đặt AIBOXPLUS            ||"
+    echo "|| 0. Thoát                        ||"
     echo "====================================="
-    printf "Chọn số (0-6): "
+    printf "Chọn số theo danh sách (0-6): "
 }
 
 main() {
@@ -139,7 +139,7 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2|3)
-                [ "$choice" = "1" ] && APK=$AIBOX_APK || APK=$FREE_APK || APK=$PREMIUM_APK
+                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
@@ -173,7 +173,7 @@ main() {
                 exit 0
                 ;;
             3|4|5)
-                [ "$choice" = "3" ] &&  APK=$AIBOX_APK || APK=$FREE_APK || APK=$PREMIUM_APK
+                [ "$choice" = "3" ] &&  APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
