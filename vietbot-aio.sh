@@ -16,6 +16,26 @@ UNI_SOUND_APK="uni-sound.apk"
 
 log_info() { echo "[PHICOMM-R1] $*"; }
 
+open_browser() {
+    URL="http://192.168.43.1:8081"
+
+    if [ -d "/data/data/com.termux" ] && command -v termux-open-url >/dev/null 2>&1; then
+        termux-open-url "$URL"
+
+    elif command -v apk >/dev/null 2>&1; then
+        echo "====================================="
+        echo "Truy cập Safari và mở:"
+        echo "$URL"
+        echo "====================================="
+
+    elif command -v open >/dev/null 2>&1; then
+        open "$URL" >/dev/null 2>&1
+
+    else
+        echo "Truy cập: $URL"
+    fi
+}
+
 setup_env() {
     if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
@@ -198,7 +218,9 @@ main() {
                 
                 echo ""
                 echo "Cài đặt hoàn tất."
-                echo "Vào wifi Phicomm R1, truy cập 192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
+				echo "Đang mở trang cấu hình..."
+                sleep 1
+                open_browser
                 exit 0
                 ;;
             0) exit 0 ;;
