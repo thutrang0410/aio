@@ -8,6 +8,7 @@ ADB="adb"
 BASE_URL="https://github.com/thutrang0410/vietbot/releases/download/r1"
 PACKAGE_NAME="info.dourok.voicebot"
 
+AIBOX_APK="goc.apk"
 FREE_APK="free.apk"
 PREMIUM_APK="premium.apk"
 DLNA_APK="auto-dlna.apk"
@@ -120,13 +121,15 @@ show_menu() {
     echo "===================================="
     echo "||   CÀI ĐẶT VIETBOT ALL-IN-ONE   ||"
     echo "===================================="
-    echo " 1. Cài Full 3 Apps (Free)"
-    echo " 2. Cài Full 3 Apps (Premium)"
-    echo " 3. Update Free"
-    echo " 4. Update Premium"
+	echo " 1. Cài Full 3 Apps (AIBOX)"
+    echo " 2. Cài Full 3 Apps (Free)"
+    echo " 3. Cài Full 3 Apps (Premium)"
+	echo " 4. Update AIBOX"
+    echo " 5. Update Free"
+    echo " 6. Update Premium"
     echo " 0. Thoát"
     echo "===================================="
-    printf "Chọn số (0-4): "
+    printf "Chọn số (0-6): "
 }
 
 main() {
@@ -135,16 +138,16 @@ main() {
         show_menu
         read choice < /dev/tty
         case $choice in
-            1|2)
-                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK
+            1|2|3)
+                [ "$choice" = "1" ] && APK=$AIBOX_APK || APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
                 echo ""
-                echo "[2/2] Cài đặt Vietbot."
+                echo "[2/2] Cài đặt Voicebot."
                 connect_adb
                 hide_bloatware
                 
@@ -169,14 +172,14 @@ main() {
                 
                 exit 0
                 ;;
-            3|4)
-                [ "$choice" = "3" ] && APK=$FREE_APK || APK=$PREMIUM_APK
+            3|4|5)
+                [ "$choice" = "3" ] &&  APK=$AIBOX_APK || APK=$FREE_APK || APK=$PREMIUM_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Vietbot"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
                 
                 echo ""
-                echo "[2/2] Cập nhật Vietbot."
+                echo "[2/2] Cập nhật Voicebot."
                 connect_adb
                 hide_bloatware
                 
