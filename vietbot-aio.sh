@@ -159,7 +159,7 @@ main() {
         show_menu
         read choice < /dev/tty
         case $choice in
-            1|2)
+            1|2|3)
         case "$choice" in
             1) APK=$FREE_APK ;;
             2) APK=$PREMIUM_APK ;;
@@ -197,11 +197,11 @@ main() {
                 
                 exit 0
                 ;;	
-            3|4|5)
+            4|5|6)
         case "$choice" in
-            3) APK=$FREE_APK ;;
-            4) APK=$PREMIUM_APK ;;
-            5) APK=$AIBOXPLUS_APK ;;
+            4) APK=$FREE_APK ;;
+            5) APK=$PREMIUM_APK ;;
+            6) APK=$AIBOXPLUS_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
