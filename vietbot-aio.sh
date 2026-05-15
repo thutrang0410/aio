@@ -122,15 +122,14 @@ show_menu() {
     echo "||  CÀI ĐẶT VOICEBOT ALL-IN-ONE    ||"
 	echo "|| LƯU Ý: FREE/PREMIUM CỦA VIETBOT ||"
     echo "====================================="
-	echo "|| 1. Cài 3 Apps (FREE - V1.1)     ||"
-    echo "|| 2. Cài 3 Apps (PREMIUM - V1.1)  ||"
-    echo "|| 3. Cài 3 Apps (AIBOX - V5.1.2)  ||"
-	echo "|| 4. VIETBOT (FREE - V1.1)        ||"
-    echo "|| 5. VIETBOT (PREMIUM - V1.1)     ||"
-    echo "|| 6. AIBOX+ (AIBOX - V5.1.2)      ||"
+	echo "|| 1. Cài FULL FREE - V1.1         ||"
+    echo "|| 2. Cài FULL PREMIUM - V1.1      ||"
+	echo "|| 3. VIETBOT FREE - V1.1          ||"
+    echo "|| 4. VIETBOT PREMIUM - V1.1       ||"
+    echo "|| 5. [AIBOX+] - V5.1.2            ||"
     echo "|| 0. Thoát                        ||"
     echo "====================================="
-    printf "Chọn số theo danh sách (0-6): "
+    printf "Chọn số theo danh sách (0-5): "
 }
 
 main() {
@@ -139,11 +138,10 @@ main() {
         show_menu
         read choice < /dev/tty
         case $choice in
-            1|2|3)
+            1|2)
         case "$choice" in
             1) APK=$FREE_APK ;;
             2) APK=$PREMIUM_APK ;;
-            3) APK=$AIBOXPLUS_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
@@ -177,11 +175,11 @@ main() {
                 
                 exit 0
                 ;;	
-            4|5|6)
+            3|4|5)
         case "$choice" in
-            4) APK=$FREE_APK ;;
-            5) APK=$PREMIUM_APK ;;
-            6) APK=$AIBOXPLUS_APK ;;
+            3) APK=$FREE_APK ;;
+            4) APK=$PREMIUM_APK ;;
+            5) APK=$AIBOXPLUS_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
