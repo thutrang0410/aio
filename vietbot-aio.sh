@@ -144,6 +144,7 @@ show_menu() {
     echo "====================================="
 	echo "|| 1. Cài FULL FREE - V1.1         ||"
     echo "|| 2. Cài FULL PREMIUM - V1.1      ||"
+	echo "|| 3. Cài FULL [AIBOX+] - V5.1.2   ||"
 	echo "|| 3. VIETBOT FREE - V1.1          ||"
     echo "|| 4. VIETBOT PREMIUM - V1.1       ||"
     echo "|| 5. [AIBOX+] - V5.1.2            ||"
@@ -162,6 +163,7 @@ main() {
         case "$choice" in
             1) APK=$FREE_APK ;;
             2) APK=$PREMIUM_APK ;;
+			3) APK=$AIBOXPLUS_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
