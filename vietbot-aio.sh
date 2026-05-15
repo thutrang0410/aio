@@ -139,7 +139,11 @@ main() {
         read choice < /dev/tty
         case $choice in
             1|2|3)
-                [ "$choice" = "1" ] && APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
+        case "$choice" in
+            1) APK=$FREE_APK ;;
+            2) APK=$PREMIUM_APK ;;
+            3) APK=$AIBOXPLUS_APK ;;
+        esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
@@ -173,7 +177,11 @@ main() {
                 exit 0
                 ;;
             4|5|6)
-                [ "$choice" = "4" ] &&  APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
+        case "$choice" in
+            1) APK=$FREE_APK ;;
+            2) APK=$PREMIUM_APK ;;
+            3) APK=$AIBOXPLUS_APK ;;
+        esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
