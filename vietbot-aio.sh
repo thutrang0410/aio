@@ -167,7 +167,7 @@ main() {
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
@@ -205,7 +205,7 @@ main() {
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "$APK"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
                 
                 echo ""
                 echo "[2/2] Cập nhật Voicebot."
