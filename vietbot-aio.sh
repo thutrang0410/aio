@@ -150,7 +150,7 @@ show_menu() {
     echo "|| 6. [AIBOX+] - V5.1.2            ||"
     echo "|| 0. Thoát                        ||"
     echo "====================================="
-    printf "Chọn số theo danh sách (0-5): "
+    printf "Chọn số theo danh sách (0-6): "
 }
 
 main() {
