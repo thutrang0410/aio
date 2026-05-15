@@ -172,8 +172,8 @@ main() {
                 
                 exit 0
                 ;;
-            3|4|5)
-                [ "$choice" = "3" ] &&  APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
+            4|5|6)
+                [ "$choice" = "4" ] &&  APK=$FREE_APK || APK=$PREMIUM_APK || APK=$AIBOXPLUS_APK
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "Voicebot"
