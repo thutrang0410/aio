@@ -176,11 +176,12 @@ main() {
                 
                 exit 0
                 ;;
+				
             4|5|6)
         case "$choice" in
-            1) APK=$FREE_APK ;;
-            2) APK=$PREMIUM_APK ;;
-            3) APK=$AIBOXPLUS_APK ;;
+            4) APK=$FREE_APK ;;
+            5) APK=$PREMIUM_APK ;;
+            6) APK=$AIBOXPLUS_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
