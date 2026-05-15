@@ -118,9 +118,9 @@ install_apk() {
 
 show_menu() {
     clear
-    echo "===================================="
-    echo "||   CÀI ĐẶT VIETBOT ALL-IN-ONE   ||"
-    echo "===================================="
+    echo "====================================="
+    echo "||  CÀI ĐẶT VOICEBOT ALL-IN-ONE    ||"
+    echo "====================================="
 	echo " 1. Cài Full 3 Apps (AIBOX)"
     echo " 2. Cài Full 3 Apps (Free)"
     echo " 3. Cài Full 3 Apps (Premium)"
@@ -128,7 +128,7 @@ show_menu() {
     echo " 5. Update Free"
     echo " 6. Update Premium"
     echo " 0. Thoát"
-    echo "===================================="
+    echo "====================================="
     printf "Chọn số (0-6): "
 }
 
