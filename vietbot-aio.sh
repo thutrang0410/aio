@@ -10,7 +10,7 @@ PACKAGE_NAME="info.dourok.voicebot"
 
 FREE_APK="free.apk"
 PREMIUM_APK="premium.apk"
-AIBOXPLUS_APK="goc.apk"
+AIBOXPLUS_APK="aibox+.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
