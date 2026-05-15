@@ -120,13 +120,14 @@ show_menu() {
     clear
     echo "====================================="
     echo "||  CÀI ĐẶT VOICEBOT ALL-IN-ONE    ||"
+	echo "|| LƯU Ý: FREE/PREMIUM CỦA VIETBOT ||"
     echo "====================================="
-	echo "|| 1. Cài Full 3 Apps (FREE)       ||"
-    echo "|| 2. Cài Full 3 Apps (PREMIUM)    ||"
-    echo "|| 3. Cài Full 3 Apps (AIBOXPLUS)  ||"
-	echo "|| 4. Cài đặt VIETBOT-FREE         ||"
-    echo "|| 5. Cài đặt VIETBOT-PREMIUM      ||"
-    echo "|| 6. Cài đặt AIBOXPLUS            ||"
+	echo "|| 1. Cài 3 Apps (FREE - V1.1)     ||"
+    echo "|| 2. Cài 3 Apps (PREMIUM - V1.1)  ||"
+    echo "|| 3. Cài 3 Apps (AIBOX - V5.1.2)  ||"
+	echo "|| 4. VIETBOT (FREE - V1.1)        ||"
+    echo "|| 5. VIETBOT (PREMIUM - V1.1)     ||"
+    echo "|| 6. AIBOX+ (AIBOX - V5.1.2)      ||"
     echo "|| 0. Thoát                        ||"
     echo "====================================="
     printf "Chọn số theo danh sách (0-6): "
@@ -175,8 +176,7 @@ main() {
                 "$ADB" -s "$ADB_DEVICE" reboot
                 
                 exit 0
-                ;;
-				
+                ;;	
             4|5|6)
         case "$choice" in
             4) APK=$FREE_APK ;;
