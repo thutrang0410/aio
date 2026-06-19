@@ -123,7 +123,7 @@ hide_bloatware() {
 }
 
 launch() {
-    log_info "Khởi động ứng dụng Vietbot..."
+    log_info "Khởi chạy ứng dụng Voicebot..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
 }
 
@@ -223,8 +223,8 @@ main() {
                 launch
                 
                 echo ""
-                echo "Cài đặt hoàn tất."
 				echo "Đang mở trang cấu hình..."
+                echo "Cài đặt hoàn tất."
                 sleep 1
                 open_browser
                 exit 0
