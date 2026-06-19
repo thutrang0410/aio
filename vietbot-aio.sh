@@ -14,7 +14,7 @@ AIBOXPLUS_APK="aibox+.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
-log_info() { echo "[PHICOMM-R1] $*"; }
+log_info() { echo "[CHANGG] $*"; }
 
 open_browser() {
     URL="http://192.168.43.1:8081"
@@ -139,7 +139,7 @@ install_apk() {
 show_menu() {
     clear
     echo "======================================="
-    echo "||   CÀI ĐẶT VOICEBOT ALL-IN-ONE     ||"
+    echo "||   CÀI ĐẶT ALL-IN-ONE BY CHANGG    ||"
 	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
     echo "======================================="
 	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
