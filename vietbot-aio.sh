@@ -5,7 +5,7 @@ ADB_DEVICE_PORT="5555"
 ADB_DEVICE="$ADB_DEVICE_IP:$ADB_DEVICE_PORT"
 ADB="adb"
 
-BASE_URL="https://github.com/thutrang0410/vietbot/releases/download/r1"
+BASE_URL="https://github.com/thutrang0410/aio/releases/download/acb"
 PACKAGE_NAME="info.dourok.voicebot"
 
 FREE_APK="free.apk"
