@@ -14,7 +14,7 @@ AIBOXPLUS_APK="aibox+.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
-log_info() { echo "[CHANGG] $*"; }
+log_info() { echo "[PHICOMM-R1] $*"; }
 
 open_browser() {
     URL="http://192.168.43.1:8081"
@@ -90,7 +90,7 @@ wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
         if [ "$prompt_shown" -eq 0 ]; then
-            echo "[CHANGG] Hãy kết nối tới Wifi của loa: Phicomm R1"
+            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
             prompt_shown=1
         fi
         sleep 3
@@ -146,7 +146,7 @@ show_menu() {
 	echo " ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝"
 	echo ""
     echo "======================================="
-    echo "||   CÀI ĐẶT ALL-IN-ONE BY CHANGG    ||"
+    echo "||        CÀI ĐẶT ALL-IN-ONE         ||"
 	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
 	echo "||  CHỌN SỐ ĐÚNG TRẠNG THÁI CỦA LOA  ||"
     echo "======================================="
