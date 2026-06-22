@@ -90,7 +90,7 @@ wait_for_wifi() {
     local prompt_shown=0
     while ! ping -c 1 -W 1 "$ADB_DEVICE_IP" >/dev/null 2>&1; do
         if [ "$prompt_shown" -eq 0 ]; then
-            echo "[PHICOMM-R1] Hãy kết nối tới Wifi của loa: Phicomm R1"
+            echo "[CHANGG] Hãy kết nối tới Wifi của loa: Phicomm R1"
             prompt_shown=1
         fi
         sleep 3
@@ -141,6 +141,7 @@ show_menu() {
     echo "======================================="
     echo "||   CÀI ĐẶT ALL-IN-ONE BY CHANGG    ||"
 	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
+	echo "||  CHỌN SỐ ĐÚNG TRẠNG THÁI CỦA LOA  ||"
     echo "======================================="
 	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
 	echo "||  1. [VIETBOT] FULL FREE - V1.2    ||"
