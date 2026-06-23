@@ -136,25 +136,31 @@ install_apk() {
     "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm install -r "/data/local/tmp/$apk_file"
 }
 
+box() {
+    local width=$(tput cols)
+    local text="$1"
+    printf "%*s\n" $(((${#text} + width) / 2)) "$text"
+}
+
 show_menu() {
     clear
-    echo "======================================="
-    echo "||        CÀI ĐẶT ALL-IN-ONE         ||"
-	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
-	echo "||  CHỌN SỐ ĐÚNG TRẠNG THÁI CỦA LOA  ||"
-    echo "======================================="
-	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
-	echo "||  1. [VIETBOT] FULL FREE - V1.2    ||"
-    echo "||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
-	echo "||  3. [AIBOX++] FULL - V5.1.3       ||"
-	echo "======================================="
-	echo "||          CHỈ CÀI MỖI AI           ||"
-	echo "||  4. [VIETBOT] FREE - V1.2         ||"
-    echo "||  5. [VIETBOT] PREMIUM - V1.2      ||"
-    echo "||  6. [AIBOX++] - V5.1.3            ||"
-	echo "======================================="
-    echo "||  0. Thoát                         ||"
-    echo "======================================="
+    box "======================================="
+    box "||        CÀI ĐẶT ALL-IN-ONE         ||"
+    box "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
+    box "||  CHỌN SỐ ĐÚNG TRẠNG THÁI CỦA LOA  ||"
+    box "======================================="
+    box "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
+    box "||  1. [VIETBOT] FULL FREE - V1.2    ||"
+    box "||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
+    box "||  3. [AIBOX++] FULL - V5.1.3       ||"
+    box "======================================="
+    box "||          CHỈ CÀI MỖI AI           ||"
+    box "||  4. [VIETBOT] FREE - V1.2         ||"
+    box "||  5. [VIETBOT] PREMIUM - V1.2      ||"
+    box "||  6. [AIBOX++] - V5.1.3            ||"
+    box "======================================="
+    box "||  0. Thoát                         ||"
+    box "======================================="
     printf "Chọn số theo danh sách (0-6): "
 }
 
