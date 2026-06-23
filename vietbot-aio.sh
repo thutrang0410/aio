@@ -11,6 +11,7 @@ PACKAGE_NAME="info.dourok.voicebot"
 FREE_APK="free.apk"
 PREMIUM_APK="premium.apk"
 AIBOXPLUS_APK="aibox+.apk"
+VBOT_APK="VBotClient.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
@@ -149,15 +150,17 @@ show_menu() {
     echo "${offset}||  1. [VIETBOT] FULL FREE - V1.2    ||"
     echo "${offset}||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
     echo "${offset}||  3. [AIBOX++] FULL - V5.1.3       ||"
+	echo "${offset}||  4. [VBOT] FULL                   ||"
     echo "${offset}======================================="
     echo "${offset}||          CHỈ CÀI MỖI AI           ||"
-    echo "${offset}||  4. [VIETBOT] FREE - V1.2         ||"
+    echo "${offset}||  5. [VIETBOT] FREE - V1.2         ||"
     echo "${offset}||  5. [VIETBOT] PREMIUM - V1.2      ||"
-    echo "${offset}||  6. [AIBOX++] - V5.1.3            ||"
+    echo "${offset}||  5. [AIBOX++] - V5.1.3            ||"
+	echo "${offset}||  8. [VBOT]                        ||"
     echo "${offset}======================================="
     echo "${offset}||  0. Thoát                         ||"
     echo "${offset}======================================="
-    printf "Chọn số theo danh sách (0-6): "
+    printf "Chọn số theo danh sách (0-8): "
 }
 
 main() {
@@ -166,11 +169,12 @@ main() {
         show_menu
         read choice < /dev/tty
         case $choice in
-            1|2|3)
+            1|2|3|4)
         case "$choice" in
             1) APK=$FREE_APK ;;
             2) APK=$PREMIUM_APK ;;
 			3) APK=$AIBOXPLUS_APK ;;
+			4) APK=$VBOT_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
@@ -204,11 +208,12 @@ main() {
                 
                 exit 0
                 ;;	
-            4|5|6)
+            5|6|7|8)
         case "$choice" in
-            4) APK=$FREE_APK ;;
-            5) APK=$PREMIUM_APK ;;
-            6) APK=$AIBOXPLUS_APK ;;
+            5) APK=$FREE_APK ;;
+            6) APK=$PREMIUM_APK ;;
+            7) APK=$AIBOXPLUS_APK ;;
+			8) APK=$VBOT_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
