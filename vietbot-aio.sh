@@ -24,7 +24,7 @@ open_browser() {
 
     elif command -v apk >/dev/null 2>&1; then
         echo "====================================="
-        echo "Truy cập Safari và mở:"
+        echo "Mở Chrome và truy cập:"
         echo "$URL"
         echo "====================================="
 
