@@ -157,7 +157,7 @@ show_menu() {
     echo "${offset}======================================="
     echo "${offset}||  0. Thoát                         ||"
     echo "${offset}======================================="
-    printf "${offset}Chọn số theo danh sách (0-6): "
+    printf "Chọn số theo danh sách (0-6): "
 }
 
 main() {
