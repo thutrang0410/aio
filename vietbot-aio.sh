@@ -24,7 +24,7 @@ open_browser() {
 
     elif command -v apk >/dev/null 2>&1; then
         echo "====================================="
-        echo "Mở Chrome và truy cập:"
+        echo "Truy cập Safari và mở:"
         echo "$URL"
         echo "====================================="
 
@@ -138,25 +138,22 @@ install_apk() {
 
 show_menu() {
     clear
-    offset="        "   
-
-    echo "${offset}======================================="
-    echo "${offset}||        CÀI ĐẶT ALL-IN-ONE         ||"
-    echo "${offset}||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
-    echo "${offset}||  CHỌN SỐ ĐÚNG TRẠNG THÁI CỦA LOA  ||"
-    echo "${offset}======================================="
-    echo "${offset}||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
-    echo "${offset}||  1. [VIETBOT] FULL FREE - V1.2    ||"
-    echo "${offset}||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
-    echo "${offset}||  3. [AIBOX++] FULL - V5.1.3       ||"
-    echo "${offset}======================================="
-    echo "${offset}||          CHỈ CÀI MỖI AI           ||"
-    echo "${offset}||  4. [VIETBOT] FREE - V1.2         ||"
-    echo "${offset}||  5. [VIETBOT] PREMIUM - V1.2      ||"
-    echo "${offset}||  6. [AIBOX++] - V5.1.3            ||"
-    echo "${offset}======================================="
-    echo "${offset}||  0. Thoát                         ||"
-    echo "${offset}======================================="
+    echo "======================================="
+    echo "||        CÀI ĐẶT ALL-IN-ONE         ||"
+	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
+    echo "======================================="
+	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
+	echo "||  1. [VIETBOT] FULL FREE - V1.2    ||"
+    echo "||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
+	echo "||  3. [AIBOX++] FULL - V5.1.3       ||"
+	echo "======================================="
+	echo "||          CHỈ CÀI MỖI AI           ||"
+	echo "||  4. [VIETBOT] FREE - V1.2         ||"
+    echo "||  5. [VIETBOT] PREMIUM - V1.2      ||"
+    echo "||  6. [AIBOX++] - V5.1.3            ||"
+	echo "======================================="
+    echo "||  0. Thoát                         ||"
+    echo "======================================="
     printf "Chọn số theo danh sách (0-6): "
 }
 
@@ -204,7 +201,7 @@ main() {
                 
                 exit 0
                 ;;	
-            4|5|6|)
+            4|5|6)
         case "$choice" in
             4) APK=$FREE_APK ;;
             5) APK=$PREMIUM_APK ;;
