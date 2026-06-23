@@ -138,7 +138,7 @@ install_apk() {
 
 show_menu() {
     clear
-    offset="            "   
+    offset="       "   
 
     echo "${offset}======================================="
     echo "${offset}||        CÀI ĐẶT ALL-IN-ONE         ||"
