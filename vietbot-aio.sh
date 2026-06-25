@@ -258,6 +258,8 @@ main() {
                 echo ""
                 echo "Cài đặt hoàn tất."
                 sleep 1
+				"$ADB" -s "$ADB_DEVICE" reboot
+				
                 exit 0
                 ;;
             0) exit 0 ;;
