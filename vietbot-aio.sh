@@ -243,7 +243,6 @@ main() {
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "MUSIC"
-                progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
                 echo ""
@@ -257,7 +256,6 @@ main() {
                 install_apk "$HOME/$APK"
                 launchs
                 
-                install_apk "$HOME/$DLNA_APK"
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
