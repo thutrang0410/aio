@@ -130,7 +130,7 @@ launch() {
 }
 
 launchs() {
-    log_info "Khởi chạy ứng dụng Voicebot..."
+    log_info "Khởi chạy ứng dụng Music..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGES_NAME/com.wifi.transfer.pro.MainActivity"
 }
 
@@ -247,7 +247,6 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt MusicPro."
                 connect_adb
-                hide_bloatware
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
