@@ -280,6 +280,7 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt VBOTCLIENT."
                 connect_adb
+				hide_bloatware
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE1_NAME"
