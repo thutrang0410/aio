@@ -236,9 +236,9 @@ main() {
                 open_browser
                 exit 0
                 ;;
-			7)
+			9)
         case "$choice" in
-            7) APK=$MUSIC_APK ;;
+            9) APK=$MUSIC_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
