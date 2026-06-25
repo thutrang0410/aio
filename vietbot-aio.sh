@@ -129,6 +129,11 @@ launch() {
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
 }
 
+launchs() {
+    log_info "Khởi chạy ứng dụng Voicebot..."
+    "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/com.wifi.transfer.pro.MainActivity"
+}
+
 install_apk() {
     local local_path="$1"
     local apk_file=$(basename "$local_path")
@@ -245,10 +250,10 @@ main() {
                 hide_bloatware
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
-                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
                 
                 install_apk "$HOME/$APK"
-                launch
+                launchs
                 
                 echo ""
                 echo "Cài đặt hoàn tất."
