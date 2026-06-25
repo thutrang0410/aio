@@ -131,7 +131,7 @@ launch() {
 
 launchs() {
     log_info "Khởi chạy ứng dụng Voicebot..."
-    "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/com.wifi.transfer.pro.MainActivity"
+    "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGES_NAME/com.wifi.transfer.pro.MainActivity"
 }
 
 install_apk() {
