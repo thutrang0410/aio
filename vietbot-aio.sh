@@ -7,10 +7,12 @@ ADB="adb"
 
 BASE_URL="https://github.com/thutrang0410/aio/releases/download/acb"
 PACKAGE_NAME="info.dourok.voicebot"
+PACKAGES_NAME="com.wifi.transfer.pro"
 
 FREE_APK="free.apk"
 PREMIUM_APK="premium.apk"
 AIBOXPLUS_APK="aibox+.apk"
+MUSIC_APK="music.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
@@ -227,6 +229,30 @@ main() {
                 echo "Cài đặt hoàn tất."
                 sleep 1
                 open_browser
+                exit 0
+                ;;
+			7)
+        case "$choice" in
+            7) APK=$MUSIC_APK ;;
+        esac
+                echo ""
+                echo "[1/2] Chuẩn bị tải file cập nhật."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "MP3"
+                
+                echo ""
+                echo "[2/2] Cài đặt MusicPro."
+                connect_adb
+                hide_bloatware
+                
+                log_info "Kiểm tra làm sạch thiết bị..."
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGE_NAME"
+                
+                install_apk "$HOME/$APK"
+                launch
+                
+                echo ""
+                echo "Cài đặt hoàn tất."
+                sleep 1
                 exit 0
                 ;;
             0) exit 0 ;;
