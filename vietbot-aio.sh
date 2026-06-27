@@ -146,7 +146,7 @@ hide_bloatware() {
 
 hide_bloatwares() {
     log_info "Vô hiệu hóa bloatware..."
-    local apps="device airskill exceptionreporter ijetty netctl otaservice productiontest bugreport"
+    local apps="device exceptionreporter otaservice productiontest bugreport"
     for app in $apps; do
         "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
     done
