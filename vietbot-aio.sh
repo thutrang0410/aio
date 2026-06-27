@@ -144,14 +144,6 @@ hide_bloatware() {
     done
 }
 
-hide_bloatwares() {
-    log_info "Vô hiệu hóa bloatware..."
-    local apps="device"
-    for app in $apps; do
-        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-    done
-}
-
 launch() {
     log_info "Khởi chạy ứng dụng Voicebot..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
@@ -275,7 +267,6 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt MUSIC."
                 connect_adb
-                hide_bloatwares
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
@@ -303,7 +294,6 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt MUSIC."
                 connect_adb
-                hide_bloatwares
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
