@@ -273,7 +273,7 @@ main() {
                 progress_download "$BASE_URL/$APK" "$HOME/$APK" "MUSIC PRO"
                 
                 echo ""
-                echo "[2/2] Cập nhật Voicebot."
+                echo "[2/2] Cài đặt MUSIC."
                 connect_adb
                 hide_bloatwares
                 
