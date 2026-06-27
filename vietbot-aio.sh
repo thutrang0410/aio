@@ -244,13 +244,39 @@ main() {
                 open_browser
                 exit 0
                 ;;
+			8)
+        case "$choice" in
+            8) APK=$MUSIC_PRO ;;
+        esac
+                echo ""
+                echo "[1/2] Chuẩn bị tải file cập nhật."
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "MUSIC PRO"
+                
+                echo ""
+                echo "[2/2] Cập nhật Voicebot."
+                connect_adb
+                hide_bloatwares
+                
+                log_info "Kiểm tra làm sạch thiết bị..."
+                "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
+                
+                install_apk "$HOME/$APK"
+                launchs
+                
+                echo ""
+				echo "Đang mở trang cấu hình..."
+                echo "Cài đặt hoàn tất."
+                sleep 1
+                open_browser
+                exit 0
+                ;;
 			9)
         case "$choice" in
             9) APK=$MUSIC_PRO ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
-                progress_download "$BASE_URL/$APK" "$HOME/$APK" "MUSIC"
+                progress_download "$BASE_URL/$APK" "$HOME/$APK" "MUSIC PRO"
                 progress_download "$BASE_URL/$DLNA_APK" "$HOME/$DLNA_APK" "DLNA"
                 progress_download "$BASE_URL/$UNI_SOUND_APK" "$HOME/$UNI_SOUND_APK" "Unisound"
                 
