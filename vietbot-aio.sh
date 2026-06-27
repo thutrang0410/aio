@@ -158,7 +158,7 @@ launch() {
 }
 
 launchs() {
-    log_info "Khởi chạy ứng dụng Voicebot..."
+    log_info "Khởi chạy ứng dụng Music..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGES_NAME/com.wifi.transfer.pro.MainActivity"
 }
 
