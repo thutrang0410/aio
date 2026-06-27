@@ -166,9 +166,6 @@ install_apk() {
 show_menu() {
     clear
     echo "======================================="
-    echo "||        CÀI ĐẶT ALL-IN-ONE         ||"
-	echo "||  LƯU Ý: FREE/PREMIUM CỦA VIETBOT  ||"
-    echo "======================================="
 	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
 	echo "||  1. [VIETBOT] FULL FREE - V1.2    ||"
     echo "||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
