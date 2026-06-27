@@ -38,6 +38,26 @@ open_browser() {
     fi
 }
 
+open_browsers() {
+    URL="http://192.168.43.1:9999"
+
+    if [ -d "/data/data/com.termux" ] && command -v termux-open-url >/dev/null 2>&1; then
+        termux-open-url "$URL"
+
+    elif command -v apk >/dev/null 2>&1; then
+        echo "====================================="
+        echo "Truy cập Safari và mở:"
+        echo "$URL"
+        echo "====================================="
+
+    elif command -v open >/dev/null 2>&1; then
+        open "$URL" >/dev/null 2>&1
+
+    else
+        echo "Truy cập: $URL"
+    fi
+}
+
 setup_env() {
     if [ -d "/data/data/com.termux" ]; then
         echo "=====> Cài qua Termux <====="
@@ -267,7 +287,7 @@ main() {
 				echo "Đang mở trang cấu hình..."
                 echo "Cài đặt hoàn tất."
                 sleep 1
-                open_browser
+                open_browsers
                 exit 0
                 ;;
 			9)
