@@ -319,7 +319,7 @@ main() {
                 echo ""
                 log_info "Đang khởi động lại loa..."
 				log_info "Cài đặt hoàn tất."
-				log_info "Vào wifi Phicomm R1, truy cập 192.168.43.1:8081 để cấu hình Wi-Fi cho thiết bị."
+				log_info "Vào wifi Phicomm R1, truy cập 192.168.43.1:9999 để cấu hình Wi-Fi cho thiết bị."
                 sleep 2
                 "$ADB" -s "$ADB_DEVICE" reboot
                 
