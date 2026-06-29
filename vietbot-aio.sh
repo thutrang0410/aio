@@ -152,7 +152,6 @@ launch() {
 launchs() {
     log_info "Khởi chạy ứng dụng Music..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGES_NAME/com.wifi.transfer.pro.MainActivity"
-	"$ADB" -s "$ADB_DEVICE" shell am start "com.phicomm.speaker.player/.EchoService"
 }
 
 launchss() {
