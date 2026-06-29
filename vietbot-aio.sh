@@ -144,6 +144,14 @@ hide_bloatware() {
     done
 }
 
+hide_bloatwares() {
+    log_info "Vô hiệu hóa bloatware..."
+    local apps="airskill exceptionreporter ijetty netctl otaservice productiontest bugreport"
+    for app in $apps; do
+        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
+    done
+}
+
 launch() {
     log_info "Khởi chạy ứng dụng Voicebot..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
