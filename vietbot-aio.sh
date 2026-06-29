@@ -144,14 +144,6 @@ hide_bloatware() {
     done
 }
 
-hide_bloatwares() {
-    log_info "Vô hiệu hóa bloatware..."
-    local apps="exceptionreporter otaservice productiontest bugreport"
-    for app in $apps; do
-        "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm hide "com.phicomm.speaker.$app" >/dev/null 2>&1
-    done
-}
-
 launch() {
     log_info "Khởi chạy ứng dụng Voicebot..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGE_NAME/.java.activities.MainActivity"
@@ -160,6 +152,12 @@ launch() {
 launchs() {
     log_info "Khởi chạy ứng dụng Music..."
     "$ADB" -s "$ADB_DEVICE" shell am start -n "$PACKAGES_NAME/com.wifi.transfer.pro.MainActivity"
+	"$ADB" -s "$ADB_DEVICE" shell am start "com.phicomm.speaker.player/.EchoService"
+}
+
+launchss() {
+    log_info "Khởi chạy ứng dụng DLNA..."
+	"$ADB" -s "$ADB_DEVICE" shell am start "com.phicomm.speaker.player/.EchoService"
 }
 
 install_apk() {
@@ -272,8 +270,7 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt MUSIC."
                 connect_adb
-				hide_bloatwares
-                
+				
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
                 
@@ -300,7 +297,6 @@ main() {
                 echo ""
                 echo "[2/2] Cài đặt MUSIC."
                 connect_adb
-				hide_bloatwares
                 
                 log_info "Kiểm tra làm sạch thiết bị..."
                 "$ADB" -s "$ADB_DEVICE" shell /system/bin/pm uninstall "$PACKAGES_NAME"
@@ -309,6 +305,8 @@ main() {
                 launchs
                 
                 install_apk "$HOME/$DLNA_APK"
+				launchss
+				
                 install_apk "$HOME/$UNI_SOUND_APK"
                 
                 "$ADB" -s "$ADB_DEVICE" shell settings put secure install_non_market_apps 1
