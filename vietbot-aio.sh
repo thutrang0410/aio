@@ -388,11 +388,11 @@ upgrade_firmware() {
     mkdir -p "$upgrade_dir/firmware"
     
     log_info "Tải file cấu hình $txt_file..."
-    local txt_url="https://raw.githubusercontent.com/trunghieu1604/r1-sh/main/$txt_file"
+    local txt_url="https://raw.githubusercontent.com/thutrang0410/aio/main/$txt_file"
     progress_download "$txt_url" "$upgrade_dir/$txt_file" "$txt_file"
     
     log_info "Tải file zip firmware $zip_file..."
-    local zip_url="https://raw.githubusercontent.com/trunghieu1604/r1-sh/main/firmware/$zip_file"
+    local zip_url="https://raw.githubusercontent.com/thutrang0410/aio/main/firmware/$zip_file"
     progress_download "$zip_url" "$upgrade_dir/firmware/$zip_file" "$zip_file"
 
     local def_ip=$(detect_local_ip)
