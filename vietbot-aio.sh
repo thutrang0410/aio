@@ -336,7 +336,7 @@ select_r1_ip() {
         return 0
     fi
 
-    log_info "Đang quét tìm loa R1 trong mạng nội bộ..."
+    log_info "Đang quét tìm Phicomm-R1..."
     local scanned_ips=$(scan_r1_ip)
     
     if [ -n "$scanned_ips" ]; then
@@ -442,7 +442,6 @@ upgrade_firmware() {
     echo "=========================================================="
     echo "|| Loa Phicomm R1 đang khởi động lại.                   ||"
     echo "|| Loa sẽ tự động kết nối lại Wifi và bắt đầu tải ROM.  ||"
-    echo "|| Vui lòng giữ cả Loa và Thiết bị chạy script luôn bật!||"
     echo "|| KHÔNG ĐƯỢC TẮT NGUỒN LOA VÀ THIẾT BỊ CHẠY SCRIPT NÀY ||"
     echo "|| Sau khi nâng cấp xong, hãy chạy Option 7 để dọn dẹp. ||"
     echo "=========================================================="
@@ -476,7 +475,7 @@ cleanup_upgrade() {
         log_info "Đã xóa xong."
     else
         log_info "Không thể kết nối ADB để tự động xóa file trên loa."
-        log_info "Hãy đảm bảo loa đã bật và kết nối cùng mạng, sau đó chạy lại Option 8."
+        log_info "Hãy đảm bảo loa đã bật và kết nối cùng mạng, sau đó chạy lại Option 7."
     fi
 
     local upgrade_dir="$HOME/r1_upgrade"
@@ -631,9 +630,9 @@ show_menu() {
     echo "||  4. [VIETBOT] PREMIUM - V1.2      ||"
 	echo "======================================="
 	echo "||        CẤU HÌNH & NÂNG CẤP LOA    ||"
-	echo "||  5. Cấu hình Wi-Fi cho loa R1     ||"
-	echo "||  6. Nâng cấp Firmware R1          ||"
-	echo "||  7. Xoá Cấu hình cũ & Tắt Server  ||"
+	echo "||  5. Cấu hình Wi-Fi                ||"
+	echo "||  6. Nâng cấp Firmware             ||"
+	echo "||  7. Xoá Firmware cũ & Tắt Server  ||"
 	echo "======================================="
     echo "||  0. Thoát                         ||"
     echo "======================================="
