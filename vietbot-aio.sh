@@ -9,8 +9,7 @@ CHOSEN_R1_IP=""
 BASE_URL="https://github.com/thutrang0410/aio/releases/download/acb"
 PACKAGE_NAME="info.dourok.voicebot"
 
-FREE_APK="free.apk"
-PREMIUM_APK="premium.apk"
+VIETBOT_APK="vietbot.apk"
 DLNA_APK="auto-dlna.apk"
 UNI_SOUND_APK="uni-sound.apk"
 
@@ -442,9 +441,9 @@ upgrade_firmware() {
 
     echo "=========================================================="
     echo "|| Loa Phicomm R1 đang khởi động lại.                   ||"
-    echo "|| Loa sẽ tự động kết nối lại Wifi và bắt đầu tải ROM.  ||"
-    echo "|| KHÔNG ĐƯỢC TẮT NGUỒN LOA VÀ THIẾT BỊ CHẠY SCRIPT NÀY ||"
-    echo "|| Sau khi nâng cấp xong, hãy chạy Option 7 để dọn dẹp. ||"
+    echo "|| Loa sẽ tự động kết nối Wifi và bắt đầu tải ROM.      ||"
+    echo "|| KHÔNG ĐƯỢC TẮT LOA VÀ THIẾT BỊ CHẠY SCRIPT NÀY       ||"
+    echo "|| Sau khi nâng cấp xong, chạy Option 5 để dọn dẹp.     ||"
     echo "=========================================================="
     printf "Nhấn Enter để quay lại menu..."
     read -r temp
@@ -623,17 +622,15 @@ show_menu() {
     clear
     echo "======================================="
 	echo "||   CÀI ĐẶT AI - DLNA - UNISOUND    ||"
-	echo "||  1. [VIETBOT] FULL FREE - V1.2    ||"
-    echo "||  2. [VIETBOT] FULL PREMIUM - V1.2 ||"
+	echo "||  1. [VIETBOT] FULL V1.3           ||"
 	echo "======================================="
 	echo "||          CHỈ CÀI MỖI AI           ||"
-	echo "||  3. [VIETBOT] FREE - V1.2         ||"
-    echo "||  4. [VIETBOT] PREMIUM - V1.2      ||"
+	echo "||  2. [VIETBOT] V1.3                ||"
 	echo "======================================="
 	echo "||        CẤU HÌNH & NÂNG CẤP LOA    ||"
-	echo "||  5. Cấu hình Wi-Fi                ||"
-	echo "||  6. Nâng cấp Firmware             ||"
-	echo "||  7. Xoá Firmware cũ & Tắt Server  ||"
+	echo "||  3. Cấu hình Wi-Fi                ||"
+	echo "||  4. Nâng cấp Firmware             ||"
+	echo "||  5. Xoá Firmware cũ & Tắt Server  ||"
 	echo "======================================="
     echo "||  0. Thoát                         ||"
     echo "======================================="
@@ -648,10 +645,9 @@ main() {
         show_menu
         read -r choice
         case $choice in
-            1|2)
+            1)
         case "$choice" in
-            1) APK=$FREE_APK ;;
-            2) APK=$PREMIUM_APK ;;
+            1) APK=$VIETBOT_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file."
@@ -685,10 +681,9 @@ main() {
                 
                 exit 0
                 ;;	
-            3|4)
+            2)
         case "$choice" in
-            3) APK=$FREE_APK ;;
-            4) APK=$PREMIUM_APK ;;
+            2) APK=$VIETBOT_APK ;;
         esac
                 echo ""
                 echo "[1/2] Chuẩn bị tải file cập nhật."
@@ -712,13 +707,13 @@ main() {
                 open_browser
                 exit 0
                 ;;
-            5)
+            3)
                 config_wifi
                 ;;
-            6)
+            4)
                 upgrade_firmware_menu
                 ;;
-            7)
+            5)
                 cleanup_upgrade
                 ;;
 			0) exit 0 ;;
